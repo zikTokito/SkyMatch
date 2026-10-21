@@ -2,196 +2,202 @@
 
 <img src="assets/app.png" alt="SkyMatch" width="112" />
 
-# SkyMatch · 天幕
+# SkyMatch
 
-**让桌面壁纸跟着窗外的天气和光线走。**
+**A weather-aware wallpaper matcher for Windows and Wallpaper Engine.**
 
-一个面向 Windows + Wallpaper Engine 的本地优先天气壁纸匹配器。读取当前位置的实时天气，结合清晨 / 白天 / 黄昏 / 夜晚，从本机已订阅壁纸和 Steam 创意工坊候选中挑出一张，并在合适的时机自动切换。
+SkyMatch reads the live weather at your location, combines it with the time of day, and picks a wallpaper from your subscribed Wallpaper Engine library or the Steam Workshop. It can switch automatically when the weather, the light, or your schedule changes.
 
 [![Release](https://img.shields.io/github/v/release/zikTokito/SkyMatch?style=for-the-badge&color=ffd166)](https://github.com/zikTokito/SkyMatch/releases)
 [![License](https://img.shields.io/badge/license-AGPL--3.0-2ea44f?style=for-the-badge)](LICENSE)
-[![Platform](https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-0078d4?style=for-the-badge)](#系统要求)
+[![Platform](https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-0078d4?style=for-the-badge)](#requirements)
 [![.NET](https://img.shields.io/badge/.NET%20Framework-4.8-512bd4?style=for-the-badge)](https://dotnet.microsoft.com/download/dotnet-framework/net48)
+[![Build](https://github.com/zikTokito/SkyMatch/actions/workflows/build.yml/badge.svg)](https://github.com/zikTokito/SkyMatch/actions/workflows/build.yml)
 
-[功能](#功能) · [截图](#截图) · [算法](#算法) · [优势与局限](#优势与局限) · [快速开始](#快速开始) · [源码构建](#从源码构建) · [常见问题](#常见问题) · [许可证](#许可证)
+**English** | [Chinese](README.zh-CN.md)
 
 </div>
 
 ---
 
-> **一句话介绍**：SkyMatch 不替 Steam 订阅壁纸，而是把“你已经拥有的壁纸”按天气、时段和画面内容重新编排，交给 Wallpaper Engine 切换。识别、匹配和缓存全部在本机完成，不上传壁纸或桌面截图。
+> **Short version:** SkyMatch does not subscribe to wallpapers for you. It reorganizes the wallpapers you already own by weather, time of day, and visual content, then hands the selected one to Wallpaper Engine. All classification and caching happen locally; no wallpaper image or desktop screenshot is uploaded.
 
-> **署名 / Author**：**Trzipx**
-> **状态**：可运行的个人项目，仍在持续迭代。
-> **适合**：喜欢桌面氛围、愿意为识图首次计算等待几分钟、使用 Wallpaper Engine 的 Windows 用户。
-> **不适合**：需要 100% 准确分类、完全零 CPU 占用、或不愿接受 AGPL 许可证的用户。
+> **Author / maintainer:** **Trzipx**  
+> **Status:** working personal project, actively iterated.  
+> **Best for:** Windows users who use Wallpaper Engine and want an atmospheric desktop without building a manual playlist.  
+> **Not for:** users who need 100% classification accuracy, zero CPU usage, or a permissive non-copyleft license.
 
-## 目录
+The application UI is currently in Chinese. An English UI is on the roadmap; this README documents the product and the algorithms in English.
 
-- [功能](#功能)
-- [截图](#截图)
-- [工作原理](#工作原理)
-- [算法](#算法)
-  - [1. 壁纸发现与解析](#1-壁纸发现与解析)
-  - [2. 定位与天气](#2-定位与天气)
-  - [3. 视觉特征](#3-视觉特征)
-  - [4. 启发式天气 / 时段分类](#4-启发式天气--时段分类)
-  - [5. CLIP 零样本分类](#5-clip-零样本分类)
-  - [6. 人物检测与内容过滤](#6-人物检测与内容过滤)
-  - [7. 排序与匹配分数](#7-排序与匹配分数)
-  - [8. 自动跟随状态机](#8-自动跟随状态机)
-  - [9. 创意工坊抓取与排序](#9-创意工坊抓取与排序)
-  - [10. 隐藏白名单与屏蔽](#10-隐藏白名单与屏蔽)
-  - [11. 性能策略](#11-性能策略)
-- [优势与局限](#优势与局限)
-- [系统要求](#系统要求)
-- [快速开始](#快速开始)
-- [从源码构建](#从源码构建)
-- [目录结构](#目录结构)
-- [数据与隐私](#数据与隐私)
-- [常见问题](#常见问题)
-- [路线图](#路线图)
-- [贡献](#贡献)
-- [许可证](#许可证)
-- [第三方组件](#第三方组件)
-- [致谢](#致谢)
+## Table of contents
 
-## 功能
+- [Features](#features)
+- [Screenshots](#screenshots)
+- [How it works](#how-it-works)
+- [Algorithms](#algorithms)
+  - [1. Wallpaper discovery and parsing](#1-wallpaper-discovery-and-parsing)
+  - [2. Geolocation and weather](#2-geolocation-and-weather)
+  - [3. Visual features](#3-visual-features)
+  - [4. Heuristic weather and time-of-day classification](#4-heuristic-weather-and-time-of-day-classification)
+  - [5. CLIP zero-shot classification](#5-clip-zero-shot-classification)
+  - [6. Person detection and content filtering](#6-person-detection-and-content-filtering)
+  - [7. Ranking and match score](#7-ranking-and-match-score)
+  - [8. Auto-follow state machine](#8-auto-follow-state-machine)
+  - [9. Workshop crawling and sorting](#9-workshop-crawling-and-sorting)
+  - [10. Hidden whitelist and blocking](#10-hidden-whitelist-and-blocking)
+  - [11. Performance strategy](#11-performance-strategy)
+- [Advantages and limitations](#advantages-and-limitations)
+- [Requirements](#requirements)
+- [Quick start](#quick-start)
+- [Build from source](#build-from-source)
+- [Project structure](#project-structure)
+- [Data and privacy](#data-and-privacy)
+- [FAQ](#faq)
+- [Roadmap](#roadmap)
+- [Contributing](#contributing)
+- [License](#license)
+- [Third-party components](#third-party-components)
+- [Credits](#credits)
 
-### 天气与桌面
+## Features
 
-- **定位到市 / 区**：IP 定位 + 经纬度反查区县；支持中文 / 英文城市搜索，保留最近 8 个城市，定位可锁定。
-- **实时天气总览**：温度、体感、湿度、风速、降雨概率、云量、降水量、日出日落。
-- **逐小时预报**：从当前整点开始滚动显示，页面每 30 秒按当前时间重算。
-- **未来 8 天**：窗口模式 4×2 排列；全屏模式自动扩展为 24 小时 + 7 天宽屏布局。
-- **天气图谱**：每种天气类型显示代表壁纸，点击分类直接跳到壁纸库对应筛选。
-- **每 5 秒同步外部切换**：在 Wallpaper Engine 里手动换壁纸后，SkyMatch 自动读取当前活动壁纸并刷新「使用中」状态。
+### Weather and desktop
 
-### 壁纸库
+- **City / district geolocation:** IP-based location plus reverse geocoding to the district level. Search in Chinese or English, keep the last eight cities, and lock the location if desired.
+- **Live weather overview:** temperature, apparent temperature, humidity, wind, rain probability, cloud cover, precipitation, sunrise, and sunset.
+- **Hourly forecast:** starts at the current hour and rolls forward; recalculated every 30 seconds rather than frozen at fetch time.
+- **Eight-day forecast in windowed mode:** arranged as a 4×2 grid. Fullscreen mode expands to 24 hours + 7 days with the existing wide layout.
+- **Weather atlas:** each weather category shows a representative wallpaper. Click a category to jump to the matching library filter.
+- **External-switch sync:** if you change the wallpaper manually in Wallpaper Engine, SkyMatch reads the active wallpaper every five seconds and refreshes the “in use” state.
 
-- 读取 Wallpaper Engine 已订阅 / 已下载壁纸，扫描 `steamapps/workshop/content/431960`。
-- 本地已订阅壁纸自动进入**隐藏白名单**，不受 Steam 标签、风景优先、人物过滤影响，默认出现在壁纸库；仍遵守手动屏蔽、手动排除和年龄分级。
-- 支持天气筛选、标题 / 标签 / 描述搜索、网格卡片、悬停大图、详情评分。
-- 可把任意壁纸**手动锁定**到某个天气，或恢复自动识别；可排除 / 屏蔽。
-- 每个天气标签独立记住滚动位置；切换标签重新计算滚动范围。
-- 本地壁纸卡片按窗口模式固定 3 列、最大化固定 5 列，避免拉宽变形。
+### Wallpaper library
 
-### 创意工坊精选
+- Scans Wallpaper Engine’s subscribed/downloaded wallpapers under `steamapps/workshop/content/431960`.
+- Subscribed local wallpapers automatically enter a **hidden whitelist**. They appear in the library regardless of Steam tags, scenery preference, or person detection, while manual blocks, manual exclusions, and age ratings still apply.
+- Weather filters, title/tag/description search, grid cards, hover previews, and per-wallpaper scoring details.
+- Manually lock a wallpaper to one weather category, restore automatic classification, hide it, or block it.
+- Each weather tab remembers its own scroll position and recalculates its scroll range when switching.
+- The local library uses a fixed 3-column layout in windowed mode and 5 columns when maximized, preventing cards from stretching.
 
-- 默认按 Steam 创意工坊 `mostsubscribed` 页面抓取候选，但最终按**不重复订阅人数**排序，不展示投票数或名次。
-- 风景优先开启：为 9 个内容标签各取前 100 张；关闭：为 25 个标签各取前 50 张，合并去重。
-- 支持网格 / 列表、天气筛选、分页、搜索、悬停预览、直接应用、未安装时订阅。
-- 抓取过程渐进呈现；预览图、缓存和排序在后台补齐。
-- Steam SSR 预览链接缺少尺寸参数时，依次尝试 637×358、1024×1024、5000×5000，修复 502 / 缺图。
-- 大于 10 MB 的视频候选直接跳过；纯色块预览在工坊隐藏，本地已下载壁纸仍保留在壁纸库但默认不参与匹配。
-- 抓取缓存 12 小时，可手动「重新抓取」。
+### Workshop highlights
 
-### 自动跟随
+- Crawls Steam’s `mostsubscribed` workshop pages, then sorts by **unique subscriber count**; vote counts and rank badges are not shown.
+- Scenery preference on: up to 100 items for each of 9 content tags. Off: up to 50 items for each of 25 tags, merged and deduplicated.
+- Grid/list views, weather filters, pagination, search, hover previews, direct apply, and an “open Workshop” action for uninstalled items.
+- Progressive results: each fetched page is appended immediately; previews, cache, and final sorting continue in the background.
+- Missing Steam SSR preview size parameters are repaired by trying 637×358, 1024×1024, and 5000×5000 CDN variants.
+- Videos larger than 10 MB are skipped. Solid-color previews are hidden from Workshop results; locally downloaded copies remain in the library but are excluded from matching.
+- Workshop cache lasts 12 hours; a manual refresh is available.
 
-- 天气每小时刷新；时段每 30 秒检查一次；只有天气类别或时段变化才触发匹配。
-- **只在当前壁纸不匹配时切换**：已经匹配当前天气 / 时段的壁纸不会被“更高分”的壁纸替换。
-- **全屏保护**：检测到全屏游戏 / 视频时暂停自动切换，退出全屏后恢复检查。
-- **推荐轮换**：首页「自动更换壁纸」开关 + 「每隔 __ 分钟自动更换」输入；关闭时隐藏，打开时渐入；轮换只在当前天气 / 时段的候选里选。
-- 关闭自动跟随、恢复最初壁纸、切换通知、关闭到托盘、开机启动。
-- 通过 Wallpaper Engine 官方命令行切换，不直接改 Steam 文件；首次扫描保存原始壁纸，可随时恢复。
+### Auto-follow
 
-### 识图与内容控制
+- Weather refreshes hourly; the time slot is checked every 30 seconds. Matching is triggered only when the weather category or time slot actually changes.
+- **Switch only when needed:** if the current wallpaper already matches the current weather and time slot, a higher-scoring wallpaper is not loaded just because it exists.
+- **Fullscreen protection:** automatic switching and recommendation rotation pause while a fullscreen game or video is in the foreground. A deferred check resumes after leaving fullscreen.
+- **Recommendation rotation:** a home-page toggle plus an inline “Every __ minutes” field. The field is hidden when the toggle is off and fades in when enabled. Rotation only chooses from candidates that match the current weather/time.
+- Tray mode, start with Windows, notifications, pause auto-follow, and restore the original wallpaper.
+- Switching uses Wallpaper Engine’s official command-line control; Steam files are never modified.
 
-- 固定使用 **CLIP ViT-L/14** 离线识别天气、时段、主人物 / 主风景。
-- 首次全量计算会逐张推理工坊预览；结果写入本地 `vision-cache.json`，后续复用，只补算新增 / 变化项。
-- 可选 **YOLOv8n** 人物检测，风景优先时过滤包含人物的预览（包括远景小人）。
-- 内容分级：全年龄 / 青少年 / 成人，可任意组合；本地读 `contentrating`，工坊读分级标签。
-- 隐藏白名单、手动屏蔽、手动校准、自动排除，优先级明确。
-- 模型离线运行，不上传壁纸；L/14 首次加载约 700–800 MB 内存。
+### Vision and content controls
 
-## 截图
+- Fixed **CLIP ViT-L/14** local inference for weather, time of day, and subject (character vs. scenery).
+- First full classification downloads workshop previews and runs inference once. Results are cached in `vision-cache.json`; later runs only classify new or changed previews.
+- Optional **YOLOv8n** person detection; scenery preference filters previews containing people, including small distant figures.
+- Content ratings: Everyone / Questionable / Mature, selectable in any combination. Local wallpapers read `contentrating`; Workshop items use rating tags.
+- Hidden whitelist, manual blocks, manual calibration, and automatic exclusions have explicit priority rules.
+- Models run offline. Loading CLIP L/14 requires roughly 700–800 MB of RAM.
+
+## Screenshots
 
 <div align="center">
 
-| 天气总览 | 壁纸库 |
+| Weather dashboard | Wallpaper library |
 |:---:|:---:|
 | <img src="docs/dashboard.png" width="440" /> | <img src="docs/library.png" width="440" /> |
 
-| 创意工坊 | 设置 |
+| Workshop highlights | Settings |
 |:---:|:---:|
 | <img src="docs/workshop.png" width="440" /> | <img src="docs/settings.png" width="440" /> |
 
 </div>
 
-> 截图中的地点为公开演示位置；发布前请确认自己的截图不包含真实住址、账号名或其他个人信息。
+> The screenshots use a public demo location. The application UI is Chinese; the English UI is planned.
 
-## 工作原理
+## How it works
 
 ```text
 ┌──────────────────────┐      ┌──────────────────────┐
-│ Wallpaper Engine      │      │ Open-Meteo / IP 定位  │
-│ 431960 / project.json │      │ 当前天气 + 8 天预报   │
+│ Wallpaper Engine      │      │ Open-Meteo / IP geo  │
+│ 431960 / project.json │      │ current + 8-day data │
 └──────────┬───────────┘      └──────────┬───────────┘
            │                             │
            ▼                             ▼
    ┌───────────────┐             ┌───────────────┐
-   │ 壁纸解析       │             │ 天气分类       │
-   │ 类型/标签/预览 │             │ 8 类 + 4 时段  │
+   │ Wallpaper      │             │ Weather        │
+   │ parser         │             │ 8 classes      │
+   │ type/tags/img  │             │ 4 time slots   │
    └───────┬───────┘             └───────┬───────┘
            │                             │
            ▼                             ▼
    ┌───────────────┐             ┌───────────────┐
-   │ CLIP / YOLO   │             │ 匹配评分       │
-   │ 视觉分类       │────────────▶│ 天气+时段+热度 │
-   └───────────────┘             └───────┬───────┘
+   │ CLIP / YOLO   │             │ Ranking        │
+   │ local vision  │────────────▶│ weather+time+  │
+   └───────────────┘             │ popularity     │
+                                 └───────┬───────┘
                                          │
                                          ▼
                                  ┌───────────────┐
-                                 │ 自动跟随状态机 │
-                                 │ 全屏/已匹配跳过│
+                                 │ Auto-follow    │
+                                 │ fullscreen /   │
+                                 │ already match  │
                                  └───────┬───────┘
                                          │
                                          ▼
                                  Wallpaper Engine CLI
 ```
 
-SkyMatch 是“推荐器 + 调度器”，不是 Wallpaper Engine 的替代品：
+SkyMatch is a **recommender and scheduler**, not a replacement for Wallpaper Engine:
 
-1. 扫描并分类你已经拥有的壁纸；
-2. 取当前天气、时段和用户筛选条件；
-3. 计算每张壁纸的匹配分；
-4. 只在不匹配或用户主动要求时，调用 Wallpaper Engine 切换；
-5. 把识别结果、工坊目录和预览图缓存到本地。
+1. Scan and classify the wallpapers you already own.
+2. Read the current weather, time slot, and user filters.
+3. Score every eligible wallpaper.
+4. Apply a wallpaper only when it is needed or when the user asks.
+5. Cache classification results, Workshop metadata, and previews locally.
 
-## 算法
+## Algorithms
 
-> 这里描述的是当前 `1.2.0` 源码的实际实现。算法参数会继续调整；以 [`src/`](src/) 为准。
+> This section describes the actual implementation in version `1.2.0`. Parameters may change; the source under [`src/`](src/) is authoritative.
 
-### 1. 壁纸发现与解析
+### 1. Wallpaper discovery and parsing
 
-**入口**：`WallpaperScanner.Scan()`、`WallpaperEngineController`
+**Entry points:** `WallpaperScanner.Scan()`, `WallpaperEngineController`
 
-- 通过注册表 / 常见安装路径查找 Wallpaper Engine，读取 `config.json` 中每个显示器的 `selectedwallpapers`，得到当前活动壁纸。
-- 通过 Steam `libraryfolders.vdf` 枚举所有 Steam 库，扫描每个库的：
+- Finds Wallpaper Engine through the registry and common install paths, then reads `config.json` → `selectedwallpapers` for the active wallpaper of each monitor.
+- Enumerates every Steam library through `libraryfolders.vdf` and scans:
   `steamapps/workshop/content/431960/<workshopId>/`
-- 每个项目必须存在 `project.json`；解析标题、类型、文件、预览、标签、内容分级、作者和工坊 ID。
-- 允许的壁纸文件：`.pkg`、`.mp4`、`.webm`、`.html`、`.htm`、`.json`。
-- 以下项目会被跳过或排除：
-  - 没有 `project.json` 的目录；
-  - 纯应用 / 特效 / 音频可视化 / 时钟 / 鼠标粒子等非壁纸类型；
-  - 本地视频大于 **10 MB**（避免解码卡顿）；
-  - 头像、手机竖屏、Logo、纯文字、测试 / 模板等不适合作为桌面壁纸的项目。
-- 对场景壁纸优先使用 `scene.pkg`，对视频 / Web 壁纸使用实际媒体文件；生成 `LaunchPath` 交给 Wallpaper Engine。
-- 已下载壁纸按工坊 ID 与工坊候选项关联，用于“使用中 / 已安装”状态。
+- A project must contain `project.json`. SkyMatch parses title, type, file, preview, tags, content rating, author, and Workshop ID.
+- Allowed wallpaper payloads: `.pkg`, `.mp4`, `.webm`, `.html`, `.htm`, `.json`.
+- Skipped or excluded:
+  - directories without `project.json`;
+  - pure applications, effects, audio visualizers, clocks, mouse trails, and other non-wallpaper projects;
+  - local videos larger than **10 MB** (to avoid decode stalls);
+  - avatars, phone/vertical wallpapers, logos, text-only images, test/template projects, and other unsuitable desktop items.
+- Scene wallpapers prefer `scene.pkg`; video/Web wallpapers use the actual media file. The resulting `LaunchPath` is passed to Wallpaper Engine.
+- Downloaded wallpapers are joined to Workshop candidates by Workshop ID to drive “installed / in use” state.
 
-### 2. 定位与天气
+### 2. Geolocation and weather
 
-**入口**：`WeatherService`、`AppController.LocateByIpAsync()`
+**Entry points:** `WeatherService`, `AppController.LocateByIpAsync()`
 
-定位按容错链执行：
+IP geolocation fallback chain:
 
 1. `freeipapi.com/api/json`
 2. `ip-api.com/json/?lang=zh-CN`
 3. `ipwho.is/`
-4. 手动城市搜索：Open-Meteo Geocoding API
-5. 经纬度反查区县：BigDataCloud reverse-geocode-client
+4. Manual city search: Open-Meteo Geocoding API
+5. District reverse geocoding: BigDataCloud reverse-geocode-client
 
-天气来自 **Open-Meteo**：
+Weather comes from **Open-Meteo**:
 
 ```text
 https://api.open-meteo.com/v1/forecast
@@ -204,120 +210,120 @@ https://api.open-meteo.com/v1/forecast
   &timezone=auto&forecast_days=8
 ```
 
-WMO 天气代码映射为 8 类：
+WMO weather codes are mapped to eight internal categories:
 
-| 内部类别 | 典型天气 |
+| Category | Typical weather |
 |---|---|
-| `ClearDay` | 晴、主要晴朗（白天） |
-| `ClearNight` | 晴夜 |
-| `Cloudy` | 多云、局部多云 |
-| `Overcast` | 阴天 |
-| `Rain` | 小雨、中雨、阵雨 |
-| `Storm` | 雷雨、强对流 |
-| `Snow` | 雪、雨夹雪、阵雪 |
-| `Fog` | 雾、霾、低能见度 |
+| `ClearDay` | clear / mostly clear, daytime |
+| `ClearNight` | clear night |
+| `Cloudy` | partly cloudy / cloudy |
+| `Overcast` | overcast |
+| `Rain` | light rain, rain, showers |
+| `Storm` | thunderstorms, severe convection |
+| `Snow` | snow, sleet, snow showers |
+| `Fog` | fog, haze, low visibility |
 
-时段是固定本地时钟区间：
+Time slots are fixed local-clock ranges:
 
-| 时段 | 时间 |
+| Slot | Time |
 |---|---|
-| 清晨 `Dawn` | 05:00–09:00 |
-| 白天 `Day` | 09:00–17:00 |
-| 黄昏 `Dusk` | 17:00–20:00 |
-| 夜晚 `Night` | 20:00–05:00 |
+| Dawn | 05:00–09:00 |
+| Day | 09:00–17:00 |
+| Dusk | 17:00–20:00 |
+| Night | 20:00–05:00 |
 
-天气每小时刷新；跨时段检查每 30 秒执行。缓存会记录抓取时间，旧缓存可离线显示，但过期后会后台刷新。
+Weather refreshes hourly. Time-slot changes are checked every 30 seconds. Cached weather is shown offline, then refreshed in the background when due.
 
-### 3. 视觉特征
+### 3. Visual features
 
-**入口**：`WallpaperClassifier.AnalyzePreview()`
+**Entry point:** `WallpaperClassifier.AnalyzePreview()`
 
-对预览图做 72×72 的居中裁切缩略图，逐像素计算：
+Each preview is center-cropped into a 72×72 thumbnail. Per pixel:
 
-- 亮度 `L = 0.299R + 0.587G + 0.114B`；
-- 饱和度 `S = (max(R,G,B) - min(R,G,B)) / max(R,G,B)`；
-- 暗部比例：`L < 0.22`；
-- 亮部比例：`L > 0.78`；
-- 灰色比例：`S < 0.13`；
-- 暖色 / 冷色 / 紫色 / 绿色权重：按色相区间累计 `S × (0.35 + L)`；
-- 对比度：亮度标准差 × 3，截断到 1；
-- 平均亮度、平均饱和度、暖色度、冷色度、紫色度、绿色度。
+- luminance `L = 0.299R + 0.587G + 0.114B`;
+- saturation `S = (max(R,G,B) - min(R,G,B)) / max(R,G,B)`;
+- dark ratio: `L < 0.22`;
+- bright ratio: `L > 0.78`;
+- gray ratio: `S < 0.13`;
+- warm / cool / purple / green weights accumulated as `S × (0.35 + L)` over hue ranges;
+- contrast: luminance standard deviation × 3, clamped to 1;
+- mean brightness, saturation, warmth, coolness, purple, and green.
 
-这些特征是后续启发式分类、时段判断和纯色块检测的输入。
+These features feed heuristic classification, time-of-day scoring, and solid-color detection.
 
-### 4. 启发式天气 / 时段分类
+### 4. Heuristic weather and time-of-day classification
 
-**入口**：`WallpaperClassifier.ClassifyCore()`
+**Entry point:** `WallpaperClassifier.ClassifyCore()`
 
-对 8 类天气分别计算：
+For each of the eight weather categories:
 
 ```text
 weatherScore(kind) = max(-2, keywordScore × 0.72 + visualScore × 1.85)
 ```
 
-对 4 个时段分别计算：
+For each of the four time slots:
 
 ```text
 timeScore(slot) = max(-2, keywordScore × 0.78 + visualScore × 1.65)
 ```
 
-- `keywordScore`：标题、标签、描述中该类别关键词的命中数 / 权重；
-- `visualScore`：按亮度、暗部、冷色、暖色、灰度、紫色等特征构造的线性打分；
-- 置信度：
+- `keywordScore` comes from weighted matches in title, tags, and description.
+- `visualScore` is a linear score over brightness, darkness, cool/warm hue, gray, purple, and related features.
+- Confidence:
 
 ```text
 confidence = clamp(58 + 38 × (topScore - secondScore) / (|secondScore| + 2.5), 50, 96)
 ```
 
-- 标题中的游戏 / 系列名会先做噪声清理，避免“奥德赛 暮光信条”这类标题把天气带偏；
-- 命中头像、Profile、手机壁纸、竖屏、Logo、纯文字、测试 / 模板等硬拒绝词时，标记为不适配。
+- Game and franchise names are stripped before text scoring, so titles such as “Odyssey Twilight Creed” do not dominate the weather decision.
+- Hard-reject terms such as avatar, profile picture, phone wallpaper, vertical, logo, text-only, test, or template mark an item unsuitable.
 
-启发式只作为**快速兜底**和文字修正；最终识图以 CLIP 结果为主，`ClassifyOne()` 中会把启发式结果与 CLIP 结果合并，并保留置信度 / 依据文本。
+The heuristic is a fast fallback and text correction. Final classification is driven by CLIP; `ClassifyOne()` merges the CLIP and heuristic outputs and keeps confidence and reason strings.
 
-### 5. CLIP 零样本分类
+### 5. CLIP zero-shot classification
 
-**入口**：`ClipVisionClassifier`
+**Entry point:** `ClipVisionClassifier`
 
-模型：`models/clip-large/vision_model.onnx`，CLIP ViT-L/14 视觉编码器。
+Model: `models/clip-large/vision_model.onnx`, a CLIP ViT-L/14 vision encoder.
 
-1. 预览图缩放到短边 224，中心裁切成 224×224；
-2. 按 CLIP 均值 / 方差归一化：
+1. Resize the preview so its shorter edge is 224 px, then center-crop to 224×224.
+2. Normalize with CLIP mean/std:
    `mean = (0.48145466, 0.4578275, 0.40821073)`
    `std = (0.26862954, 0.26130258, 0.27577711)`
-3. ONNX Runtime 输出图像 embedding；
-4. 与 `prompt_embeddings.json` 中预生成的文本 embedding 做点积；
-5. 每个类别取该类别所有 prompt 的最高相似度；
-6. 软最大化（温度 100）得到天气 / 时段分布；
-7. 主人物 / 主风景使用单独 prompt 组（温度 20），主角概率阈值 `0.63`；
-8. 置信度 = 最高类别概率 × 100。
+3. Run ONNX Runtime to obtain the image embedding.
+4. Dot-product it with the precomputed text embeddings in `prompt_embeddings.json`.
+5. Take the maximum similarity for each category’s prompt group.
+6. Apply softmax with temperature 100 for weather and time-of-day.
+7. Character vs. scenery uses a separate prompt group with temperature 20; the character probability threshold is `0.63`.
+8. Confidence = highest category probability × 100.
 
-prompt 组覆盖：
+Prompt groups cover:
 
-- 8 类天气；
-- 4 个时段；
-- 主人物特写 / 主风景 / 远景小人等主体判断。
+- eight weather categories;
+- four time slots;
+- character close-up, wide scenery, and distant-figure subject judgments.
 
-模型完全本地运行；`prompt_embeddings.json` 是用 CLIP 文本编码器离线生成的固定向量，不包含用户数据。
+Everything runs locally. `prompt_embeddings.json` contains fixed vectors generated offline with the CLIP text encoder; it contains no user data.
 
-### 6. 人物检测与内容过滤
+### 6. Person detection and content filtering
 
-**入口**：`PersonDetector`、`WorkshopTagFilter`、`AgeRatingInfo`
+**Entry points:** `PersonDetector`, `WorkshopTagFilter`, `AgeRatingInfo`
 
-- **YOLOv8n** 输入 640×640 letterbox，输出候选中 `person` 类置信度 ≥ **0.20** 即视为包含人物；
-- 风景优先开启时，人物检测结果会过滤工坊候选和自动推荐；远景小人也会被计入；
-- 风景优先的标签黑名单包括：卡通、动漫、游戏、女性、男性、中世纪、网红事物、MMD、音乐、科幻、运动、科技、电视节目、汽车、3D、未指定样式等；
-- 内容分级同时作用于本地和工坊：
-  - 全年龄：`Everyone`；
-  - 青少年：`Questionable`；
-  - 成人：`Mature`；
-  - 至少保留一档；
-- 纯色块预览（黑、灰、单一颜色）通过 `PreviewQuality.IsSolidColor()` 检测；工坊直接隐藏，本地保留但不参与匹配。
+- **YOLOv8n** receives a 640×640 letterboxed image. Any `person` detection with confidence ≥ **0.20** counts as containing a person.
+- With scenery preference enabled, person detections filter Workshop candidates and automatic recommendations, including small distant figures.
+- The scenery tag blacklist includes cartoon, anime, game, girls/female, guys/male, medieval, influencer, MMD, music, sci-fi, sports, technology, TV show, cars, 3D, unspecified style, and similar tags.
+- Content ratings apply to both local and Workshop items:
+  - Everyone;
+  - Questionable;
+  - Mature;
+  - at least one rating must remain selected.
+- Solid-color previews (black, gray, or a single color) are detected by `PreviewQuality.IsSolidColor()`; Workshop items are hidden, while local items stay in the library but are excluded from matching.
 
-### 7. 排序与匹配分数
+### 7. Ranking and match score
 
-**入口**：`AppController.GetRanked()`、`CombinedScore()`
+**Entry points:** `AppController.GetRanked()`, `CombinedScore()`
 
-对每张候选计算：
+For every candidate:
 
 ```text
 score = weatherMatchScore
@@ -332,195 +338,195 @@ score = weatherMatchScore
 workshopSubscriptionBonus = min(3.2, log10(1 + subscriptions) / 1.55)
 ```
 
-排序键：
+Sort order:
 
-1. 综合分降序；
-2. 天气精确匹配优先；
-3. 置信度降序；
-4. 手动校准优先；
-5. 标题字典序。
+1. combined score descending;
+2. exact weather match first;
+3. confidence descending;
+4. manual calibration first;
+5. title, case-insensitive.
 
-“专属分类”优先；当某类没有专属壁纸时，仍会选综合分最高者，并在 UI 明确标注「近似推荐」。工坊订阅热度只作为小幅加权，不把投票数当排序依据。
+“Exact category” is preferred. When no exact wallpaper exists, the best approximate candidate is used and the UI marks it as approximate. Workshop popularity is only a small bonus; vote counts are never used for ordering.
 
-### 8. 自动跟随状态机
+### 8. Auto-follow state machine
 
-**入口**：`AutoFollowAsync()`、`CheckTimeChangeAsync()`、`CheckRecommendationRotationAsync()`、`ResumeDeferredAutoFollowAsync()`
+**Entry points:** `AutoFollowAsync()`, `CheckTimeChangeAsync()`, `CheckRecommendationRotationAsync()`, `ResumeDeferredAutoFollowAsync()`
 
-触发条件：
+Triggers:
 
-- 启动后首次匹配；
-- 天气小时刷新后，天气类别变化；
-- 时段变化（`UseTimeOfDay` 开启）；
-- 用户点击「按天气匹配」或应用按钮（手动，不受全屏限制）；
-- 首页「自动更换壁纸」打开且到达设定分钟数。
+- initial match at startup;
+- weather category change after the hourly refresh;
+- time-slot change when time-of-day matching is enabled;
+- user clicking “Match current weather” or applying a wallpaper (manual actions are not blocked by fullscreen);
+- the home-page rotation timer reaching its configured minute count.
 
-自动切换前检查：
+Preconditions:
 
 ```text
-AutoFollow 开启
-且 天气已就绪
-且 当前没有正在切换
-且 当前不在全屏程序（游戏 / 全屏视频）
-且 当前壁纸不匹配当前天气 / 时段
+auto-follow enabled
+weather available
+no switch already in progress
+no foreground fullscreen app (game / fullscreen video)
+current wallpaper does not match the current weather / time slot
 ```
 
-如果当前壁纸已经匹配，直接返回，不重新加载 Wallpaper Engine —— 这是减少游戏 / 桌面掉帧的关键。
+If the current wallpaper already matches, SkyMatch returns without reloading Wallpaper Engine. This is the main defense against desktop stutter.
 
-全屏检测：
+Fullscreen detection:
 
-- `SHQueryUserNotificationState()` 返回 `QUNS_RUNNING_D3D_FULL_SCREEN` / `QUNS_PRESENTATION_MODE`；
-- 前台窗口完整覆盖显示器；
-- 窗口无标题栏 / 无粗边框；
-- 排除桌面、任务栏和 SkyMatch 自身；
-- 全屏期间只记录“待恢复”，退出全屏后由 30 秒定时器恢复检查。
+- `SHQueryUserNotificationState()` reports `QUNS_RUNNING_D3D_FULL_SCREEN` / `QUNS_PRESENTATION_MODE`;
+- the foreground window covers the monitor;
+- the window has no caption and no thick frame;
+- desktop, taskbar, and SkyMatch itself are excluded;
+- fullscreen only records a deferred flag; after leaving fullscreen, a 30-second timer resumes the check.
 
-推荐轮换：
+Recommendation rotation:
 
-- 只从当前天气 / 时段的 `GetRanked()` 候选中选择；
-- 从当前活动壁纸的下一张开始循环；
-- 关闭「自动更换壁纸」立即停止；
-- 全屏期间不轮换。
+- only chooses from `GetRanked()` for the current weather/time;
+- starts from the wallpaper after the current active one and wraps around;
+- stops immediately when the rotation toggle is off;
+- never rotates while fullscreen.
 
-### 9. 创意工坊抓取与排序
+### 9. Workshop crawling and sorting
 
-**入口**：`SteamWorkshopService`、`RefreshWorkshopAsync()`
+**Entry points:** `SteamWorkshopService`, `RefreshWorkshopAsync()`
 
-- 页面：`https://steamcommunity.com/workshop/browse/?appid=431960&browsefilter=mostsubscribed&p=N`
-- 线路：英文 + 美国商店 → 英文 → 默认；
-- 25 个 Steam 内容标签（风景优先开启时只用其中 9 个），每标签 100 / 50 条；
-- SSR 页面中的 JSON 优先解析；失败时回退 HTML 标题 / 预览 / 标签抓取；
-- 合并去重，按 `subscriptions` 降序、`votes` 次序、标题排序；
-- 视频 `file_size > 10 MB` 跳过；
-- 预览 URL 修复：
-  - `//steamusercontent...` → `https://...`；
-  - 无尺寸 UGC 目录 → 依次尝试 637×358、1024×1024、5000×5000；
-  - 单张图片限制 8 MB；
-- 渐进式加载：每页完成就追加，首屏先补 40 张预览，其余后台补齐；
-- 缓存 12 小时；缓存包含候选元数据、预览路径、订阅数和识别结果。
+- Page: `https://steamcommunity.com/workshop/browse/?appid=431960&browsefilter=mostsubscribed&p=N`
+- Routes: English + US storefront, then English, then default.
+- 25 Steam content tags (only 9 when scenery preference is on), 100 / 50 items per tag.
+- Parse embedded SSR JSON first; fall back to HTML title/preview/tag extraction.
+- Merge and deduplicate; sort by `subscriptions` descending, then `votes`, then title.
+- Skip videos with `file_size > 10 MB`.
+- Preview URL repair:
+  - `//steamusercontent...` → `https://...`;
+  - UGC directory without a size suffix → try 637×358, 1024×1024, 5000×5000;
+  - one image is limited to 8 MB.
+- Progressive loading: append each page as it arrives; fetch the first 40 previews for the first screen, then continue in the background.
+- Cache for 12 hours; cached entries include metadata, preview path, subscribers, and classification.
 
-Steam 不提供第三方“代替用户点击订阅”的官方接口，因此未安装项只能打开工坊页面；下载完成后 SkyMatch 自动检测本地目录并刷新，无需重启。
+Steam has no official API for third-party subscription clicks. Uninstalled items open the Workshop page; after the user subscribes and downloads, SkyMatch detects the local folder and refreshes without requiring a restart.
 
-### 10. 隐藏白名单与屏蔽
+### 10. Hidden whitelist and blocking
 
-**入口**：`GetLibraryWallpapers()`、`WhitelistIds`、`BlockedIds`、`HiddenIds`
+**Entry points:** `GetLibraryWallpapers()`, `WhitelistIds`, `BlockedIds`, `HiddenIds`
 
-- 本机扫描到的已订阅壁纸 ID 自动写入 `WhitelistIds`；
-- 白名单项目默认进入壁纸库，绕过 Steam 标签、风景优先、人物检测和自动不适合判定；
-- 但仍遵守：
-  - 手动屏蔽 `BlockedIds`；
-  - 手动排除 `HiddenIds`；
-  - 年龄分级；
-- 白名单项目**不自动进入推荐池**，除非它本身也满足匹配条件；
-- 手动屏蔽列表使用卡片式管理，可取消屏蔽；被屏蔽壁纸不显示详情入口。
+- Every subscribed local wallpaper ID is automatically written to `WhitelistIds`.
+- Whitelisted items appear in the library by default, bypassing Steam tags, scenery preference, person detection, and automatic unsuitability checks.
+- The whitelist still respects:
+  - manual blocks (`BlockedIds`);
+  - manual exclusions (`HiddenIds`);
+  - age ratings.
+- Whitelisted items are **not automatically injected into the recommendation pool** unless they also satisfy the normal match filters.
+- The blocked list is card-based and supports unblocking. Blocked wallpapers do not expose a detail view.
 
-### 11. 性能策略
+### 11. Performance strategy
 
-- **页面懒加载**：启动只创建首页；壁纸库 / 工坊 / 设置首次进入时构建。
-- **识图缓存**：`vision-cache.json` 按壁纸 ID + 预览修改时间复用；本地完整推理延后 5 秒、低线程优先级执行。
-- **预览缓存**：工坊预览落盘，缩略图后台生成，缺图启动后补齐。
-- **增量刷新**：隐藏页面只记脏标记，不立即重建；切换壁纸只重绘当前卡片。
-- **轻量状态更新**：首页只同步「已匹配 / 立即切换」按钮，不重算整页推荐与图片。
-- **全屏保护 + 已匹配不切换**：减少 Wallpaper Engine 场景重载，这是实际掉帧的主要来源。
-- **单文件 .NET**：无需额外运行库；模型和 ONNX Runtime 随包分发。
+- **Lazy pages:** startup creates only the dashboard; library, Workshop, and settings pages are built on first visit.
+- **Vision cache:** `vision-cache.json` reuses results by wallpaper ID + preview modification time. Full local inference is delayed by five seconds and runs at below-normal thread priority.
+- **Preview cache:** Workshop previews are stored on disk; thumbnails are generated in the background and missing previews are repaired after startup.
+- **Incremental refresh:** hidden pages only set a dirty flag; switching wallpapers repaints the current card instead of rebuilding everything.
+- **Lightweight state updates:** the dashboard only syncs the “matched / apply” button instead of recomputing the whole recommendation page.
+- **Fullscreen protection and no-op matching:** fewer Wallpaper Engine scene reloads, which are the real source of frame drops.
+- **Single .NET executable:** no Python, Node.js, or extra runtime is required; models and ONNX Runtime ship with the portable release.
 
-## 优势与局限
+## Advantages and limitations
 
-### 优势
+### Advantages
 
-| 优势 | 说明 |
+| Advantage | Why it matters |
 |---|---|
-| **本地优先** | 天气请求只发定位 / 天气 API；壁纸、截图、识图结果不上传。 |
-| **无需账号 / API Key** | 使用 Open-Meteo、公开 IP 定位和 Steam 公共页面。 |
-| **真正使用已订阅壁纸** | 不改 Steam 文件，不伪造订阅，只调用 Wallpaper Engine 官方命令行。 |
-| **离线识图** | CLIP / YOLO 本地 ONNX 推理；断网时仍可使用缓存和本地分类。 |
-| **天气 + 时段双维度** | 不是简单“下雨换一张”，而是天气、时段、风景 / 人物偏好共同排序。 |
-| **可纠正** | 手动锁定天气、屏蔽、排除、白名单、年龄分级，避免算法一错到底。 |
-| **减少无意义切换** | 当前壁纸已匹配时不重载；全屏游戏 / 视频期间暂停。 |
-| **完整中文 UI** | 深色界面、天气图谱、工坊筛选、秒级时钟、托盘常驻。 |
-| **可审计** | C# 源码完整，算法参数、请求地址、排序规则都在仓库中。 |
+| **Local-first** | Weather requests contain only location/weather data; wallpapers, screenshots, and vision results are never uploaded. |
+| **No account or API key** | Uses Open-Meteo, public IP geolocation, and public Steam pages. |
+| **Uses wallpapers you already own** | Does not alter Steam files or fake subscriptions; delegates the switch to Wallpaper Engine’s official command line. |
+| **Offline vision** | CLIP / YOLO run through local ONNX inference; caches still work without a network. |
+| **Weather + time of day** | Not a simple “rain → one image” rule; weather, light, scenery, and character preference all contribute. |
+| **Correctable** | Manual weather locks, blocks, exclusions, whitelist, and age ratings prevent one bad prediction from being permanent. |
+| **Fewer pointless switches** | Already-matching wallpapers are left alone; fullscreen games/videos pause automatic switching. |
+| **Complete Chinese UI** | Dark interface, weather atlas, Workshop filters, per-second clock, tray mode. |
+| **Auditable** | C# source, scoring parameters, request URLs, and sorting rules are all in the repository. |
 
-### 局限与风险
+### Limitations and risks
 
-| 局限 | 说明 / 缓解 |
+| Limitation | Description / mitigation |
 |---|---|
-| **仅 Windows** | 依赖 .NET Framework 4.8、WinForms、Wallpaper Engine 和 Windows 音频会话。 |
-| **必须安装 Wallpaper Engine** | 没有 Wallpaper Engine 时无法切换；可扫描目录但无法应用。 |
-| **首次识图慢** | L/14 模型约 700–800 MB 内存，首次全量预览下载 + CPU 推理可能数分钟；之后走缓存。 |
-| **CPU 推理** | 没有独立 GPU 加速；低端 CPU 上批量识别会占用资源。已延后并降低线程优先级。 |
-| **分类不是 100% 准确** | CLIP 零样本 + 关键词启发式会误判抽象图、混合天气、文字图；提供手动校准。 |
-| **Steam 页面结构可能变化** | 工坊抓取依赖公开 SSR / HTML；Steam 改版、限流、502 都会影响结果。 |
-| **工坊预览可能缺失** | 部分 UGC 资源在 CDN 侧不可用；已做多尺寸回退，但仍可能无图。 |
-| **全屏检测有边界情况** | 某些无边框窗口 / 多显示器 / 覆盖层可能误判；可在设置中关闭自动跟随规避。 |
-| **不替用户订阅** | 未安装工坊壁纸只能打开页面，需要用户在 Steam 中确认订阅。 |
-| **模型体积大** | 便携包约 240 MB；仓库不包含模型权重，需要从 Release 导入。 |
-| **AGPL-3.0** | 可选 YOLOv8n 使用 AGPL-3.0；本项目整体按 AGPL-3.0 发布，商用 / 分发需遵守相应义务。 |
-| **无代码签名** | 自编译 EXE 可能触发 SmartScreen“未知发布者”。 |
-| **个人项目** | 没有多语言、自动更新、崩溃上报；Issue 响应不保证时效。 |
+| **Windows only** | Depends on .NET Framework 4.8, WinForms, Wallpaper Engine, and Windows audio sessions. |
+| **Wallpaper Engine required** | Without it SkyMatch can scan folders but cannot apply a wallpaper. |
+| **Slow first classification** | The L/14 model uses about 700–800 MB of RAM; the first full run downloads previews and may take minutes. Later runs use the cache. |
+| **CPU inference** | No dedicated GPU backend; low-end CPUs can be busy during bulk classification. Work is delayed and run at lower priority. |
+| **Not 100% accurate** | CLIP zero-shot + keyword heuristics can misread abstract images, mixed weather, and text-heavy images. Manual calibration exists. |
+| **Steam page changes** | Workshop crawling depends on public SSR/HTML; Steam redesigns, rate limits, and 502 errors affect results. |
+| **Missing Workshop previews** | Some UGC assets are unavailable at the CDN. Multi-size fallback helps but cannot guarantee an image. |
+| **Fullscreen edge cases** | Borderless windows, multi-monitor setups, and overlays can be misdetected; disabling auto-follow avoids the issue. |
+| **No automatic subscription** | Uninstalled Workshop items open the Steam page; the user must confirm the subscription. |
+| **Large models** | The portable package is about 240 MB; the Git repository does not contain model weights. |
+| **AGPL-3.0** | Optional YOLOv8n is AGPL-3.0; the project is released as AGPL-3.0. Commercial use and redistribution carry copyleft obligations. |
+| **No code signing** | Self-built executables may trigger SmartScreen “unknown publisher”. |
+| **Personal project** | No multilingual UI, auto-updater, or crash reporting; Issue response time is not guaranteed. |
 
-## 系统要求
+## Requirements
 
-- Windows 10 / 11 64 位
-- [.NET Framework 4.8](https://dotnet.microsoft.com/download/dotnet-framework/net48)（Windows 10 2004+ 通常自带）
-- [Wallpaper Engine](https://store.steampowered.com/app/431960/Wallpaper_Engine/)（Steam）
-- 首次启动需要网络（定位 / 天气 / 工坊）
-- 建议至少 4 GB 可用内存；CLIP L/14 加载时约 700–800 MB
+- Windows 10 / 11, 64-bit
+- [.NET Framework 4.8](https://dotnet.microsoft.com/download/dotnet-framework/net48) (usually included with Windows 10 2004+)
+- [Wallpaper Engine](https://store.steampowered.com/app/431960/Wallpaper_Engine/) on Steam
+- Network access on first launch (location / weather / Workshop)
+- At least 4 GB of available RAM recommended; CLIP L/14 loads about 700–800 MB
 
-## 快速开始
+## Quick start
 
-### 方式一：安装版（推荐）
+### Option 1: installer (recommended)
 
-1. 打开 [Releases](https://github.com/zikTokito/SkyMatch/releases/latest)；
-2. 下载 `SkyMatch-1.2.0-Setup.exe`；
-3. 双击安装，默认安装到 `%LOCALAPPDATA%\Programs\SkyMatch`；
-4. 启动 SkyMatch，确认 Wallpaper Engine 正在运行。
+1. Open [Releases](https://github.com/zikTokito/SkyMatch/releases/latest).
+2. Download `SkyMatch-1.2.0-Setup.exe`.
+3. Run it. The default install location is `%LOCALAPPDATA%\Programs\SkyMatch`.
+4. Start SkyMatch and make sure Wallpaper Engine is running.
 
-安装版会创建桌面和开始菜单快捷方式，不需要管理员权限。
+The installer creates desktop and Start-menu shortcuts and does not require administrator rights.
 
-### 方式二：便携版
+### Option 2: portable package
 
-1. 下载 `SkyMatch-1.2.0-Portable.zip`；
-2. 解压到任意目录；
-3. 双击 `SkyMatch.exe`。
+1. Download `SkyMatch-1.2.0-Portable.zip`.
+2. Extract it anywhere.
+3. Run `SkyMatch.exe`.
 
-便携版不包含用户缓存、历史位置、屏蔽名单或工坊预览图；这些数据写入 `%LOCALAPPDATA%\SkyMatch`。
+User caches, location history, blocked lists, and Workshop previews are not bundled; they are written to `%LOCALAPPDATA%\SkyMatch`.
 
-### 第一次使用
+### First run
 
-1. 等待 IP 定位和天气加载；
-2. SkyMatch 扫描本机壁纸并识别；
-3. 首页显示「此刻推荐」；
-4. 想暂停自动切换：关闭左侧「自动跟随」；
-5. 想恢复最初壁纸：设置 → Wallpaper Engine → 恢复最初壁纸。
+1. Wait for IP geolocation and weather.
+2. SkyMatch scans local wallpapers and classifies them.
+3. The dashboard shows the current recommendation.
+4. To pause automatic switching, turn off the **Auto-follow** toggle.
+5. To restore the original wallpaper: Settings → Wallpaper Engine → Restore original wallpaper.
 
-> 如果切换壁纸卡顿 / 掉帧，可在 Wallpaper Engine 的「设置 → 常规 → 高级」关闭「使用高精度计时器」。
+> If switching wallpapers stutters or drops frames, turn off **Use high-precision timer** in Wallpaper Engine: Settings → General → Advanced.
 
-## 从源码构建
+## Build from source
 
-### 前置条件
+### Prerequisites
 
 - Windows 10 / 11
-- .NET Framework 4.8 Developer Pack（或系统自带 `csc.exe`）
+- .NET Framework 4.8 Developer Pack (or the system `csc.exe`)
 - PowerShell 5.1+
-- 可选：Wallpaper Engine（运行 / 联调）
-- 不需要 Visual Studio；`build.ps1` 直接调用 `csc.exe`
+- Optional: Wallpaper Engine for runtime testing
+- Visual Studio is not required; `build.ps1` calls `csc.exe` directly
 
-### 1. 克隆
+### 1. Clone
 
 ```powershell
 git clone https://github.com/zikTokito/SkyMatch.git
 cd SkyMatch
 ```
 
-### 2. 导入模型
+### 2. Import models
 
-模型权重体积大，**不放入 Git 仓库**。从最新 Portable Release 中提取：
+Model weights are large and are **not stored in Git**. Extract them from the latest portable release:
 
 ```powershell
-# 先下载 SkyMatch-1.2.0-Portable.zip 到当前目录
+# Download SkyMatch-1.2.0-Portable.zip into the current directory first.
 .\scripts\import-models.ps1 -PortableZip .\SkyMatch-1.2.0-Portable.zip
 ```
 
-脚本只解压 `models/`，并校验：
+The script only extracts `models/` and verifies:
 
 ```text
 models/clip-large/vision_model.onnx
@@ -530,16 +536,16 @@ models/clip-large/prompt_embeddings.json
 models/yolo/yolov8n.onnx
 ```
 
-如果只想构建不含识图的版本，也可以跳过模型；程序会使用预览特征和关键词兜底，但推荐质量会下降。
+You can skip models if you only need to compile. The app falls back to preview features and keywords, but recommendation quality drops.
 
 <details>
-<summary>手动获取 CLIP / YOLO 模型</summary>
+<summary>Manual model setup</summary>
 
-- CLIP ViT-L/14 ONNX：`Xenova/clip-vit-large-patch14` 的 `onnx/vision_model.onnx` 及 config；
-- 文本 prompt 向量：`assets/prompt_embeddings.json`；
-- YOLOv8n ONNX：Ultralytics 导出 `yolov8n.onnx`（AGPL-3.0）。
+- CLIP ViT-L/14 ONNX: `onnx/vision_model.onnx` and config from `Xenova/clip-vit-large-patch14`;
+- text prompt vectors: `assets/prompt_embeddings.json`;
+- YOLOv8n ONNX: export `yolov8n.onnx` with Ultralytics (AGPL-3.0).
 
-模型目录结构：
+Directory layout:
 
 ```text
 models/
@@ -554,13 +560,13 @@ models/
 
 </details>
 
-### 3. 构建
+### 3. Build
 
 ```powershell
 .\build.cmd
 ```
 
-输出：
+Output:
 
 ```text
 dist\SkyMatch.exe
@@ -568,201 +574,196 @@ dist\models\...
 dist\onnxruntime.dll
 ```
 
-### 4. 运行
+### 4. Run
 
 ```powershell
 .\dist\SkyMatch.exe
 ```
 
-发布打包（可选）：
+Release packaging is optional. The installer source lives in `installer/`.
 
-```powershell
-# 安装程序源码在 installer/
-# 便携包：将 dist、README、THIRD_PARTY_NOTICES、使用说明 一起压缩
-```
-
-## 目录结构
+## Project structure
 
 ```text
 SkyMatch/
 ├─ src/
-│  ├─ AppController.cs          # 业务状态机：扫描、匹配、自动跟随、切换
-│  ├─ AppConfig.cs              # 设置 / 缓存 / 路径
-│  ├─ Models.cs                 # 壁纸、天气、设置模型
-│  ├─ Program.cs                # 入口
+│  ├─ AppController.cs          # scanning, matching, auto-follow, switching
+│  ├─ AppConfig.cs              # settings / cache / paths
+│  ├─ Models.cs                 # wallpaper, weather, settings models
+│  ├─ Program.cs                # entry point
 │  ├─ Services/
-│  │  ├─ WallpaperScanner.cs    # Steam 库 / 工坊目录扫描
-│  │  ├─ WallpaperClassifier.cs # 视觉特征 + 启发式分类
-│  │  ├─ ClipVisionClassifier.cs# CLIP ONNX 零样本分类
-│  │  ├─ PersonDetector.cs      # YOLOv8n 人物检测
-│  │  ├─ PreviewQuality.cs      # 纯色块 / 预览质量
-│  │  ├─ WeatherService.cs      # 定位 + Open-Meteo
-│  │  ├─ WorkshopService.cs     # Steam 工坊抓取 + 预览回退
-│  │  ├─ WorkshopTagFilter.cs   # 风景优先标签黑名单
+│  │  ├─ WallpaperScanner.cs    # Steam library / Workshop scanning
+│  │  ├─ WallpaperClassifier.cs # visual features + heuristics
+│  │  ├─ ClipVisionClassifier.cs# CLIP ONNX zero-shot classification
+│  │  ├─ PersonDetector.cs      # YOLOv8n person detection
+│  │  ├─ PreviewQuality.cs      # solid-color / preview quality
+│  │  ├─ WeatherService.cs      # geolocation + Open-Meteo
+│  │  ├─ WorkshopService.cs     # Workshop crawl + preview fallback
+│  │  ├─ WorkshopTagFilter.cs   # scenery tag blacklist
 │  │  ├─ WallpaperEngineController.cs
 │  │  ├─ WallpaperAudioController.cs
-│  │  ├─ FullscreenDetector.cs  # 全屏程序检测
+│  │  ├─ FullscreenDetector.cs  # fullscreen app detection
 │  │  └─ VisionCacheStore.cs
 │  └─ UI/
-│     ├─ MainForm.cs            # 窗口 / 托盘 / 定时器
-│     ├─ DashboardPage.cs       # 天气总览 / 推荐 / 自动更换开关
-│     ├─ LibraryPage.cs         # 壁纸库
-│     ├─ WorkshopPage.cs        # 工坊精选
-│     ├─ SettingsPage.cs        # 设置
-│     ├─ Controls.cs            # 自绘控件 / 开关 / 分钟输入
-│     └─ Theme.cs               # 深色主题
-├─ assets/                      # 图标 / prompt embeddings
-├─ docs/                        # 截图 / 说明
-├─ installer/                   # 自解压安装程序源码
-├─ lib/                         # 构建所需 DLL / .NET 引用
+│     ├─ MainForm.cs            # window / tray / timers
+│     ├─ DashboardPage.cs       # weather, recommendation, rotation
+│     ├─ LibraryPage.cs         # wallpaper library
+│     ├─ WorkshopPage.cs        # Workshop highlights
+│     ├─ SettingsPage.cs        # settings
+│     ├─ Controls.cs            # custom controls / toggle / minute input
+│     └─ Theme.cs               # dark theme
+├─ assets/                      # icon / prompt embeddings
+├─ docs/                        # screenshots / docs
+├─ installer/                   # self-extracting installer source
+├─ lib/                         # build DLLs / .NET reference assemblies
 ├─ scripts/import-models.ps1
-├─ models/                      # 本地模型（.gitignore，不入库）
+├─ models/                      # local models (.gitignore, not in Git)
 ├─ build.cmd / build.ps1
 ├─ README.md
 ├─ THIRD_PARTY_NOTICES.md
 └─ LICENSE
 ```
 
-## 数据与隐私
+## Data and privacy
 
-SkyMatch 不包含遥测、账号系统或广告 SDK。
+SkyMatch contains no telemetry, account system, or advertising SDK.
 
-### 会发起的网络请求
+### Network requests
 
-| 用途 | 域名 |
+| Purpose | Domain |
 |---|---|
-| IP 定位 | `freeipapi.com`、`ip-api.com`、`ipwho.is` |
-| 反查区县 | `api.bigdatacloud.net` |
-| 城市搜索 | `geocoding-api.open-meteo.com` |
-| 天气 | `api.open-meteo.com` |
-| 创意工坊 | `steamcommunity.com` |
-| 工坊预览 | `steamusercontent.com` |
+| IP geolocation | `freeipapi.com`, `ip-api.com`, `ipwho.is` |
+| Reverse geocoding | `api.bigdatacloud.net` |
+| City search | `geocoding-api.open-meteo.com` |
+| Weather | `api.open-meteo.com` |
+| Workshop | `steamcommunity.com` |
+| Workshop previews | `steamusercontent.com` |
 
-请求只包含 IP、经纬度、城市名或工坊 ID；不会上传壁纸图片、桌面截图或本地文件内容。
+Requests contain only IP, latitude/longitude, city name, or Workshop IDs. Wallpaper images, desktop screenshots, and local file contents are never uploaded.
 
-### 本地数据
+### Local data
 
 ```text
 %LOCALAPPDATA%\SkyMatch\
-├─ settings.json          # 位置、开关、屏蔽 / 白名单、手动校准
-├─ weather-cache.json     # 天气缓存
-├─ workshop-cache.json    # 工坊候选元数据
-├─ vision-cache.json      # CLIP / 特征识别结果
-├─ workshop-previews\     # 工坊预览图
-└─ logs\                  # 运行日志
+├─ settings.json          # location, toggles, blocks / whitelist, manual calibration
+├─ weather-cache.json     # weather cache
+├─ workshop-cache.json    # Workshop metadata
+├─ vision-cache.json      # CLIP / feature results
+├─ workshop-previews\     # Workshop preview images
+└─ logs\                  # runtime logs
 ```
 
-删除整个目录可恢复到“第一次打开”的状态，但会丢失手动校准、屏蔽名单和缓存。
+Deleting the directory resets the app to first-run state, but loses manual calibration, blocked lists, and caches.
 
-### 隐私建议
+### Privacy advice
 
-- 不要把 `settings.json`、日志、个人截图提交到公开仓库；
-- README 截图请遮挡真实城市、账号名和桌面内容；
-- 工坊预览来自 Steam 公共 CDN，仍受 Steam 服务条款约束。
+- Do not commit `settings.json`, logs, or personal screenshots to a public repository.
+- Redact real cities, account names, and desktop content from README screenshots.
+- Workshop previews come from Steam’s public CDN and remain subject to Steam’s terms.
 
-## 常见问题
+## FAQ
 
 <details>
-<summary><b>切换壁纸时游戏掉帧 / 桌面卡顿几秒</b></summary>
+<summary><b>Why does switching wallpapers drop frames for a few seconds?</b></summary>
 
-主要原因是 Wallpaper Engine 加载新场景，而不是 SkyMatch 在等进程。SkyMatch 已经在全屏时暂停自动切换，并且当前壁纸匹配时不重复切换。仍卡顿时：
+Wallpaper Engine loading a new scene is the main cause, not SkyMatch waiting on a process. SkyMatch pauses automatic switching while fullscreen and does not reload an already-matching wallpaper. If it still stutters:
 
-- Wallpaper Engine → 设置 → 常规 → 高级 → 关闭「使用高精度计时器」；
-- 降低推荐轮换频率；
-- 避免在游戏运行时手动切换大型场景壁纸。
+- Wallpaper Engine → Settings → General → Advanced → disable **Use high-precision timer**;
+- lower the recommendation rotation frequency;
+- avoid manual switches to large scenes while gaming.
 </details>
 
 <details>
-<summary><b>左上角天气更新失败：块的长度与它的补集不匹配</b></summary>
+<summary><b>Weather update failed with a block-length / complement error</b></summary>
 
-旧版 `HttpClient` 同时启用 GZip/Deflate，部分天气节点返回的压缩流与 .NET `DeflateStream` 不兼容。当前版本只启用 GZip，并会给出友好错误。若仍遇到，删除 `%LOCALAPPDATA%\SkyMatch\weather-cache.json` 后重试。
+Older builds enabled both GZip and Deflate decompression; some weather responses returned a compressed stream that .NET `DeflateStream` rejected. Current builds use GZip only and show a friendly error. If it persists, delete `%LOCALAPPDATA%\SkyMatch\weather-cache.json` and retry.
 </details>
 
 <details>
-<summary><b>工坊预览 502 / 图片空白</b></summary>
+<summary><b>Workshop previews return 502 or show blank</b></summary>
 
-Steam UGC 预览可能只有目录、没有尺寸参数，或 CDN 侧暂时不可用。SkyMatch 会尝试 637×358、1024×1024、5000×5000；如果全部失败，该候选仍可能出现在列表，但无图。等待 CDN 恢复或重新抓取。
+UGC preview URLs may lack a size suffix or be temporarily unavailable. SkyMatch tries 637×358, 1024×1024, and 5000×5000. If all fail, the candidate can still be listed without an image. Wait for the CDN or refresh the Workshop data.
 </details>
 
 <details>
-<summary><b>第一次识图非常慢 / 内存占用高</b></summary>
+<summary><b>First classification is very slow / memory usage is high</b></summary>
 
-CLIP ViT-L/14 首次加载约 700–800 MB，工坊预览下载 + 全量推理需要时间。结果会写入 `vision-cache.json`，之后只补算新增项。也可以在设置里关闭风景优先，减少 YOLO 检测。
+CLIP ViT-L/14 uses about 700–800 MB. The first run downloads Workshop previews and runs full inference; results are cached in `vision-cache.json`. Later runs only classify new items. Turning off scenery preference also avoids YOLO detection.
 </details>
 
 <details>
-<summary><b>为什么我的壁纸没有出现在推荐里</b></summary>
+<summary><b>Why is my wallpaper missing from recommendations?</b></summary>
 
-可能被以下规则排除：
+Possible reasons:
 
-- 手动屏蔽 / 排除；
-- 年龄分级未勾选；
-- 风景优先 + 人物检测命中；
-- 纯色块预览；
-- 视频大于 10 MB；
-- 本地已订阅白名单只保证进入壁纸库，不保证进入自动推荐池。
+- manually blocked or excluded;
+- age rating not selected;
+- scenery preference + person detection;
+- solid-color preview;
+- video larger than 10 MB;
+- a locally subscribed whitelist item only guarantees library visibility, not recommendation pool entry.
 </details>
 
 <details>
-<summary><b>软件会收集我的数据吗</b></summary>
+<summary><b>Does SkyMatch collect my data?</b></summary>
 
-没有遥测。天气和工坊请求只包含定位 / 壁纸 ID；识图完全本地。详细列表见[数据与隐私](#数据与隐私)。
+No telemetry. Weather and Workshop requests contain only location / wallpaper IDs, and vision runs locally. See [Data and privacy](#data-and-privacy).
 </details>
 
-## 路线图
+## Roadmap
 
-- [ ] 更稳的全屏检测（多显示器 / 覆盖层）
-- [ ] 可选 GPU 推理（DirectML / CUDA）
-- [ ] 更细的天气过渡（雨转晴、日出日落暖色）
-- [ ] 本地化英文 UI
-- [ ] 可配置的工坊抓取标签 / 数量
-- [ ] 更完整的自动化测试和 CI 截图对比
+- [ ] More robust fullscreen detection (multi-monitor / overlays)
+- [ ] Optional GPU inference (DirectML / CUDA)
+- [ ] Finer weather transitions (rain clearing, sunrise/sunset warmth)
+- [ ] English UI localization
+- [ ] Configurable Workshop tags / counts
+- [ ] More automated tests and screenshot comparisons
 
-## 贡献
+## Contributing
 
-欢迎 Issue / PR。请先阅读 [CONTRIBUTING.md](CONTRIBUTING.md)。
+Issues and pull requests are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md) first.
 
-- Bug 请附 Windows 版本、Wallpaper Engine 版本、复现步骤和 `%LOCALAPPDATA%\SkyMatch\logs` 中相关日志（请先脱敏）；
-- 算法调整请说明对误判 / 性能 / 许可证的影响；
-- 不要提交模型权重、用户缓存、个人截图或 Steam 凭据。
+- Bug reports: include Windows version, Wallpaper Engine version, reproduction steps, and relevant `%LOCALAPPDATA%\SkyMatch\logs` lines after redaction.
+- Algorithm changes: explain the effect on false positives, performance, and licensing.
+- Do not commit model weights, user caches, personal screenshots, or Steam credentials.
 
-## 许可证
+## License
 
-本项目整体采用 **GNU Affero General Public License v3.0（AGPL-3.0）**，见 [LICENSE](LICENSE)。
+The project is released under the **GNU Affero General Public License v3.0 (AGPL-3.0)**. See [LICENSE](LICENSE).
 
-选择 AGPL 的原因：
+Why AGPL:
 
-- 可选的 **Ultralytics YOLOv8n** 模型以 AGPL-3.0 发布；
-- 项目分发时包含该模型 / 与之配合工作，整体按 AGPL-3.0 开源最稳妥；
-- 如果你只想使用 MIT 兼容部分，可以移除 YOLO 人物检测并替换为许可兼容的检测器，但请自行确认组合许可证。
+- the optional **Ultralytics YOLOv8n** model is AGPL-3.0;
+- distributing the app with that model makes AGPL the safest overall license;
+- if you only need an MIT-compatible subset, remove YOLO person detection and replace it with a license-compatible detector, but verify the combined license yourself.
 
 Copyright (C) 2026 **Trzipx**.
 
-## 第三方组件
+## Third-party components
 
-完整清单见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
+See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for the full list.
 
-- OpenAI CLIP（MIT）
-- Xenova CLIP ViT-L/14 ONNX 转换
-- ONNX Runtime（MIT）
-- Ultralytics YOLOv8n（AGPL-3.0）
-- Open-Meteo / BigDataCloud / IP 定位服务（各自服务条款）
-- Wallpaper Engine / Steam（Valve 服务条款）
+- OpenAI CLIP (MIT)
+- Xenova CLIP ViT-L/14 ONNX conversion
+- ONNX Runtime (MIT)
+- Ultralytics YOLOv8n (AGPL-3.0)
+- Open-Meteo / BigDataCloud / IP geolocation services (their own terms)
+- Wallpaper Engine / Steam (Valve terms)
 
-SkyMatch 与 Valve、Wallpaper Engine、OpenAI、Ultralytics 均无隶属关系。
+SkyMatch is not affiliated with Valve, Wallpaper Engine, OpenAI, or Ultralytics.
 
-## 致谢
+## Credits
 
-- **作者 / 维护者**：Trzipx
-- 感谢 OpenAI CLIP、ONNX Runtime、Ultralytics、Xenova 以及 Open-Meteo 提供的开放模型 / 数据服务。
-- 感谢 Wallpaper Engine 社区提供的壁纸与预览资源。
+- **Author / maintainer:** Trzipx
+- Thanks to OpenAI CLIP, ONNX Runtime, Ultralytics, Xenova, and Open-Meteo for open models and data services.
+- Thanks to the Wallpaper Engine community for the wallpapers and previews that make desktop customization possible.
 
 ---
 
 <div align="center">
 
-如果 SkyMatch 让你的桌面更贴合窗外一点，欢迎点一个 ⭐。
+If SkyMatch makes your desktop feel a little more connected to the sky outside, consider giving it a star.
 
-**[⬆ 回到顶部](#skymatch--天幕)**
+**[Back to top](#skymatch)**
 
 </div>
