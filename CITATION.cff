@@ -1,0 +1,23 @@
+cff-version: 1.2.0
+title: "SkyMatch: weather-aware Wallpaper Engine matcher for Windows"
+message: "If you use SkyMatch in research or a derivative project, please cite it."
+type: software
+authors:
+  - family-names: "Trzipx"
+    given-names: "Trzipx"
+repository-code: "https://github.com/zikTokito/SkyMatch"
+url: "https://github.com/zikTokito/SkyMatch"
+license: AGPL-3.0
+version: "1.2.0"
+date-released: "2026-10-21"
+abstract: >-
+  SkyMatch reads local weather and time of day, classifies Wallpaper Engine
+  wallpapers with local CLIP/YOLO inference, and switches to a matching
+  wallpaper while respecting fullscreen games, manual blocks, and age ratings.
+keywords:
+  - wallpaper-engine
+  - weather
+  - clip
+  - onnx
+  - winforms
+  - desktop

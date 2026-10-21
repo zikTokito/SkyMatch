@@ -1,0 +1,41 @@
+# Build outputs
+dist/
+release/
+build/
+
+# Local model weights (large; import from the portable release)
+models/*
+!models/README.md
+
+# Local user data / backups / logs
+backups/
+*.log
+*.tmp
+
+# Git tooling
+.tools/
+.git-credentials
+
+# IDE / OS
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+*.cache
+Thumbs.db
+Desktop.ini
+
+# Archives and installers
+*.zip
+*.7z
+*.exe
+*.msi
+*.lnk
+*.sha256
+
+# Environment / secrets
+.env
+.env.*
+*.pfx
+*.p12

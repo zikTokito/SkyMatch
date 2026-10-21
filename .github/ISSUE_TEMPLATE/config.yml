@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security report
+    url: https://github.com/zikTokito/SkyMatch/security/advisories/new
+    about: 请勿在公开 Issue 中披露安全漏洞
+  - name: Wallpaper Engine support
+    url: https://help.wallpaperengine.io/
+    about: 壁纸无法加载 / Wallpaper Engine 自身问题请先看官方帮助

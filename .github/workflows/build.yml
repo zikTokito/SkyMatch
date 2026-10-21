@@ -1,0 +1,23 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build with csc
+        shell: powershell
+        run: .\build.ps1
+      - name: Upload executable
+        uses: actions/upload-artifact@v4
+        with:
+          name: SkyMatch
+          path: dist/
+          if-no-files-found: error
