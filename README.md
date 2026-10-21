@@ -27,7 +27,7 @@ SkyMatch reads the live weather at your location, combines it with the time of d
 > **Best for:** Windows users who use Wallpaper Engine and want an atmospheric desktop without building a manual playlist.  
 > **Not for:** users who need 100% classification accuracy, zero CPU usage, or a permissive non-copyleft license.
 
-The application UI is currently in Chinese. An English UI is on the roadmap; this README documents the product and the algorithms in English.
+The application is available as an **English build** (`v1.2.0-en`) and a Chinese build (main release). The English build uses the same algorithms and data, with English UI strings.
 
 ## Table of contents
 
@@ -113,15 +113,15 @@ The application UI is currently in Chinese. An English UI is on the roadmap; thi
 
 | Weather dashboard | Wallpaper library |
 |:---:|:---:|
-| <img src="docs/dashboard.png" width="440" /> | <img src="docs/library.png" width="440" /> |
+| <img src="docs-en/dashboard.png" width="440" /> | <img src="docs-en/library.png" width="440" /> |
 
 | Workshop highlights | Settings |
 |:---:|:---:|
-| <img src="docs/workshop.png" width="440" /> | <img src="docs/settings.png" width="440" /> |
+| <img src="docs-en/workshop.png" width="440" /> | <img src="docs-en/settings.png" width="440" /> |
 
 </div>
 
-> The screenshots use a public demo location. The application UI is Chinese; the English UI is planned.
+> The screenshots use a public demo location and the English build.
 
 ## How it works
 
@@ -442,7 +442,7 @@ Steam has no official API for third-party subscription clicks. Uninstalled items
 | **Weather + time of day** | Not a simple “rain → one image” rule; weather, light, scenery, and character preference all contribute. |
 | **Correctable** | Manual weather locks, blocks, exclusions, whitelist, and age ratings prevent one bad prediction from being permanent. |
 | **Fewer pointless switches** | Already-matching wallpapers are left alone; fullscreen games/videos pause automatic switching. |
-| **Complete Chinese UI** | Dark interface, weather atlas, Workshop filters, per-second clock, tray mode. |
+| **English + Chinese UI** | Separate English and Chinese builds; same engine, algorithms, and local data format. |
 | **Auditable** | C# source, scoring parameters, request URLs, and sorting rules are all in the repository. |
 
 ### Limitations and risks
@@ -461,7 +461,7 @@ Steam has no official API for third-party subscription clicks. Uninstalled items
 | **Large models** | The portable package is about 240 MB; the Git repository does not contain model weights. |
 | **AGPL-3.0** | Optional YOLOv8n is AGPL-3.0; the project is released as AGPL-3.0. Commercial use and redistribution carry copyleft obligations. |
 | **No code signing** | Self-built executables may trigger SmartScreen “unknown publisher”. |
-| **Personal project** | No multilingual UI, auto-updater, or crash reporting; Issue response time is not guaranteed. |
+| **No in-app language switch** | English and Chinese builds are separate executables; UI language is fixed per build. |
 
 ## Requirements
 
@@ -472,6 +472,16 @@ Steam has no official API for third-party subscription clicks. Uninstalled items
 - At least 4 GB of available RAM recommended; CLIP L/14 loads about 700–800 MB
 
 ## Quick start
+
+### English build
+
+Use the **English release** if you want an English UI:
+
+- [SkyMatch 1.2.0 English release](https://github.com/zikTokito/SkyMatch/releases/tag/v1.2.0-en)
+- `SkyMatch-1.2.0-English-Setup.exe`
+- `SkyMatch-1.2.0-English-Portable.zip`
+
+The English build uses the same local cache format as the Chinese build. English source lives on the [`english` branch](https://github.com/zikTokito/SkyMatch/tree/english).
 
 ### Option 1: installer (recommended)
 
@@ -715,7 +725,7 @@ No telemetry. Weather and Workshop requests contain only location / wallpaper ID
 - [ ] More robust fullscreen detection (multi-monitor / overlays)
 - [ ] Optional GPU inference (DirectML / CUDA)
 - [ ] Finer weather transitions (rain clearing, sunrise/sunset warmth)
-- [ ] English UI localization
+- [x] English UI build
 - [ ] Configurable Workshop tags / counts
 - [ ] More automated tests and screenshot comparisons
 
