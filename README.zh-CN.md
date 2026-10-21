@@ -8,6 +8,8 @@
 
 [**English**](README.md) | 简体中文
 
+> 英文 UI 版本：[SkyMatch 1.2.0 English](https://github.com/zikTokito/SkyMatch/releases/tag/v1.2.0-en)（Lite 包需另配 models）
+
 一个面向 Windows + Wallpaper Engine 的本地优先天气壁纸匹配器。读取当前位置的实时天气，结合清晨 / 白天 / 黄昏 / 夜晚，从本机已订阅壁纸和 Steam 创意工坊候选中挑出一张，并在合适的时机自动切换。
 
 [![Release](https://img.shields.io/github/v/release/zikTokito/SkyMatch?style=for-the-badge&color=ffd166)](https://github.com/zikTokito/SkyMatch/releases)
