@@ -159,7 +159,7 @@ namespace SkyMatch
             using (SolidBrush brush = new SolidBrush(Theme.Bg)) e.Graphics.FillRectangle(brush, ClientRectangle);
             gdot(e.Graphics);
             Theme.DrawText(e.Graphics, "SkyMatch", Theme.FontBold, Theme.Text, 24, 13);
-            Theme.DrawText(e.Graphics, String.IsNullOrEmpty(_subtitle) ? "壁纸与天气" : _subtitle,
+            Theme.DrawText(e.Graphics, String.IsNullOrEmpty(_subtitle) ? "Wallpapers and weather" : _subtitle,
                 Theme.FontTiny, Theme.Dim, 24, 33);
             using (Pen pen = new Pen(Theme.BorderSoft, 1f))
                 e.Graphics.DrawLine(pen, 0, Height - 1, Width, Height - 1);
@@ -238,7 +238,7 @@ namespace SkyMatch
                     RectangleF active = new RectangleF(Width - 72, 14, 58, 24);
                     using (SolidBrush brush = new SolidBrush(Theme.Alpha(Theme.Green, 50)))
                         Theme.FillRounded(e.Graphics, brush, active, 12);
-                    Theme.DrawText(e.Graphics, "桌面中", Theme.FontTiny, Theme.Green, active.X + 10, active.Y + 4);
+                    Theme.DrawText(e.Graphics, "In use", Theme.FontTiny, Theme.Green, active.X + 10, active.Y + 4);
                 }
                 string title = Theme.FitText(e.Graphics, _wallpaper.Title, Theme.FontBold, Width - 32);
                 Theme.DrawText(e.Graphics, title, Theme.FontBold, Theme.Text, 16, Height - 58);
@@ -274,15 +274,15 @@ namespace SkyMatch
             if (_wallpaper == null) return;
             WeatherKind kind = _wallpaper.MatchWeather;
             Color accent = Theme.Accent(kind);
-            Theme.DrawText(e.Graphics, "识别依据", Theme.FontTiny, Theme.Alpha(accent, 235), 0, 0);
+            Theme.DrawText(e.Graphics, "Identification basis", Theme.FontTiny, Theme.Alpha(accent, 235), 0, 0);
             Theme.DrawWrapped(e.Graphics, _wallpaper.Reason, Theme.FontBody, Theme.Text,
                 new RectangleF(0, 21, Width, 64), 3);
             string auto = _wallpaper.IsManual
-                ? "天气：锁定「" + WeatherKindInfo.Name(_wallpaper.MatchWeather) + "」"
-                    + "  ·  时段：" + TimeSlotInfo.Name(_wallpaper.PrimaryTime)
+                ? "Weather: locked to \"" + WeatherKindInfo.Name(_wallpaper.MatchWeather) + "\""
+                    + "  ·  Period: " + TimeSlotInfo.Name(_wallpaper.PrimaryTime)
                     + " " + Math.Round(_wallpaper.TimeConfidence) + "%"
-                : "天气：" + Math.Round(_wallpaper.Confidence) + "%"
-                    + "  ·  时段：" + TimeSlotInfo.Name(_wallpaper.PrimaryTime)
+                : "weather:" + Math.Round(_wallpaper.Confidence) + "%"
+                    + "  ·  Period: " + TimeSlotInfo.Name(_wallpaper.PrimaryTime)
                     + " " + Math.Round(_wallpaper.TimeConfidence) + "%";
             Theme.DrawText(e.Graphics, auto, Theme.FontTiny, Theme.Muted, 0, 88);
 
@@ -304,14 +304,14 @@ namespace SkyMatch
                 tagX += w + 6;
             }
 
-            Theme.DrawText(e.Graphics, "画面特征", Theme.FontTiny, Theme.Dim, 0, 158);
-            DrawMetric(e.Graphics, 0, 178, "明度", _wallpaper.Brightness, Width / 2 - 10);
-            DrawMetric(e.Graphics, Width / 2 + 10, 178, "饱和度", _wallpaper.Saturation, Width / 2 - 10);
-            string contrast = "对比 " + Math.Round(_wallpaper.Contrast * 100) + "%";
+            Theme.DrawText(e.Graphics, "Picture characteristics", Theme.FontTiny, Theme.Dim, 0, 158);
+            DrawMetric(e.Graphics, 0, 178, "brightness", _wallpaper.Brightness, Width / 2 - 10);
+            DrawMetric(e.Graphics, Width / 2 + 10, 178, "saturation", _wallpaper.Saturation, Width / 2 - 10);
+            string contrast = "contrast" + Math.Round(_wallpaper.Contrast * 100) + "%";
             Theme.DrawText(e.Graphics, contrast, Theme.FontTiny, Theme.Dim, 0, 208);
             if (_wallpaper.IsManual)
             {
-                Theme.DrawText(e.Graphics, "当前已手动校准，天气变化时会优先使用此分类。",
+                Theme.DrawText(e.Graphics, "Currently manually calibrated, this classification will be used first when the weather changes.",
                     Theme.FontTiny, Theme.Alpha(Theme.Yellow, 225), 0, 228);
             }
         }
@@ -377,7 +377,7 @@ namespace SkyMatch
             Font = Theme.FontBody;
 
             _header = new DialogHeader(this);
-            _header.Subtitle = "壁纸详情 · " + wallpaper.Id;
+            _header.Subtitle = "Wallpaper details ·" + wallpaper.Id;
             _header.Dock = DockStyle.Top;
             _header.Visible = false;
 
@@ -400,7 +400,7 @@ namespace SkyMatch
 
             _chips = new ChipStrip();
             _chips.ShowCounts = false;
-            _chips.Items.Add(new ChipStrip.Chip("自动识别", null));
+            _chips.Items.Add(new ChipStrip.Chip("automatic recognition", null));
             foreach (WeatherKind kind in WeatherKindInfo.All)
                 _chips.Items.Add(new ChipStrip.Chip(WeatherKindInfo.Name(kind), kind));
             _chips.SetSelectedSilent(wallpaper.ManualKind.HasValue ? wallpaper.ManualKind.Value + 1 : 0);
@@ -413,7 +413,7 @@ namespace SkyMatch
             {
                 if (_updating) return;
                 _controller.SetHidden(_wallpaper, _hideToggle.Checked);
-                _hideLabel.Text = _hideToggle.Checked ? "已从自动匹配中排除" : "从自动匹配中排除";
+                _hideLabel.Text = _hideToggle.Checked ? "Excluded from automatic matching" : "Exclude from automatic matching";
                 if (_hideToggle.Checked) Close();
             };
 
@@ -422,7 +422,7 @@ namespace SkyMatch
             _hideLabel.BackColor = Color.Transparent;
             _hideLabel.ForeColor = Theme.Muted;
             _hideLabel.Font = Theme.FontSmall;
-            _hideLabel.Text = wallpaper.Hidden ? "已从自动匹配中排除" : "从自动匹配中排除";
+            _hideLabel.Text = wallpaper.Hidden ? "Excluded from automatic matching" : "Exclude from automatic matching";
 
             _apply = new ActionButton();
             _apply.Primary = true;
@@ -431,7 +431,7 @@ namespace SkyMatch
             _apply.AccentColor = Theme.Accent(wallpaper.MatchWeather);
             if (wallpaper.IsRemote)
             {
-                _apply.Text = wallpaper.IsInstalled ? "应用此壁纸" : "打开订阅页";
+                _apply.Text = wallpaper.IsInstalled ? "Apply this wallpaper" : "Open subscription page";
                 _apply.Enabled = true;
                 if (!_simplified) _chips.Visible = false;
                 _hideToggle.Visible = false;
@@ -452,12 +452,12 @@ namespace SkyMatch
             }
             else
             {
-                _apply.Text = wallpaper.IsActive ? "正在使用" : "应用此壁纸";
+                _apply.Text = wallpaper.IsActive ? "in use" : "Apply this wallpaper";
                 _apply.Enabled = !wallpaper.IsActive;
                 _apply.Click += async delegate
                 {
                     _apply.Enabled = false;
-                    bool ok = await _controller.ApplyWallpaperAsync(_wallpaper, false, "从壁纸库应用");
+                    bool ok = await _controller.ApplyWallpaperAsync(_wallpaper, false, "Apply from wallpaper gallery");
                     if (ok) Close();
                     else _apply.Enabled = true;
                 };
@@ -470,13 +470,13 @@ namespace SkyMatch
             }
 
             _cancel = new ActionButton();
-            _cancel.Text = "关闭";
+            _cancel.Text = "Close";
             _cancel.Pill = true;
             _cancel.Size = new Size(82, 38);
             _cancel.Click += delegate { Close(); };
 
             _block = new ActionButton();
-            _block.Text = "屏蔽";
+            _block.Text = "Block";
             _block.Pill = true;
             _block.Size = new Size(82, 38);
             _block.FillColor = Color.FromArgb(220, 58, 24, 30);
@@ -561,13 +561,13 @@ namespace SkyMatch
             {
                 if (index == 0) _controller.SetManualKind(_wallpaper, null);
                 else _controller.SetManualKind(_wallpaper, WeatherKindInfo.All[index - 1]);
-                _header.Subtitle = "壁纸详情 · " + _wallpaper.Id;
+                _header.Subtitle = "Wallpaper details ·" + _wallpaper.Id;
                 _preview.Invalidate();
                 _info.Invalidate();
                 _scores.Invalidate();
                 _timeBars.Invalidate();
                 _apply.AccentColor = Theme.Accent(_wallpaper.MatchWeather);
-                _apply.Text = _wallpaper.IsActive ? "正在使用" : "应用此壁纸";
+                _apply.Text = _wallpaper.IsActive ? "in use" : "Apply this wallpaper";
                 _apply.Enabled = !_wallpaper.IsActive;
             }
             finally
@@ -592,12 +592,12 @@ namespace SkyMatch
             Theme.Setup(e.Graphics);
             if (!_simplified)
             {
-                Theme.DrawText(e.Graphics, "天气适配评分", Theme.FontBold, Theme.Text, 20, 270);
-                Theme.DrawText(e.Graphics, "根据画面亮度、色彩与文字线索评分", Theme.FontTiny, Theme.Dim, 128, 275);
-                Theme.DrawText(e.Graphics, "时段适配评分", Theme.FontBold, Theme.Text, 20, 404);
-                Theme.DrawText(e.Graphics, "结合当前时间判断清晨、白天、黄昏与夜晚", Theme.FontTiny, Theme.Dim, 128, 409);
-                Theme.DrawText(e.Graphics, "手动校准", Theme.FontBold, Theme.Text, 20, 494);
-                Theme.DrawText(e.Graphics, "选中一种天气后，自动跟随只会在该天气使用它",
+                Theme.DrawText(e.Graphics, "Weather suitability score", Theme.FontBold, Theme.Text, 20, 270);
+                Theme.DrawText(e.Graphics, "Score based on screen brightness, color and text clues", Theme.FontTiny, Theme.Dim, 128, 275);
+                Theme.DrawText(e.Graphics, "Time period adaptation score", Theme.FontBold, Theme.Text, 20, 404);
+                Theme.DrawText(e.Graphics, "Combine the current time to determine morning, day, dusk and night", Theme.FontTiny, Theme.Dim, 128, 409);
+                Theme.DrawText(e.Graphics, "Manual", Theme.FontBold, Theme.Text, 20, 494);
+                Theme.DrawText(e.Graphics, "After selecting a type of weather, Auto Follow will only use it in that weather",
                     Theme.FontTiny, Theme.Dim, 92, 499);
             }
             else
@@ -624,17 +624,17 @@ namespace SkyMatch
                         bestTime = slot;
                     }
                 }
-                Theme.DrawText(e.Graphics, "最高天气适配", Theme.FontTiny, Theme.Dim, 20, 324);
+                Theme.DrawText(e.Graphics, "Highest weather adaptation", Theme.FontTiny, Theme.Dim, 20, 324);
                 Theme.DrawText(e.Graphics, WeatherKindInfo.Name(bestWeather) + "  "
                     + bestWeatherScore.ToString("0.0"), Theme.FontBold,
                     Theme.Accent(bestWeather), 118, 322);
-                Theme.DrawText(e.Graphics, "最高时段适配", Theme.FontTiny, Theme.Dim, 20, 346);
+                Theme.DrawText(e.Graphics, "Highest time period adaptation", Theme.FontTiny, Theme.Dim, 20, 346);
                 Theme.DrawText(e.Graphics, TimeSlotInfo.Name(bestTime) + "  "
                     + bestTimeScore.ToString("0.0"), Theme.FontBold,
                     Theme.TimeColor(bestTime), 118, 344);
 
-                Theme.DrawText(e.Graphics, "手动校准", Theme.FontBold, Theme.Text, 20, 372);
-                Theme.DrawText(e.Graphics, "选中一种天气后，自动跟随只会在该天气使用它",
+                Theme.DrawText(e.Graphics, "Manual", Theme.FontBold, Theme.Text, 20, 372);
+                Theme.DrawText(e.Graphics, "After selecting a type of weather, Auto Follow will only use it in that weather",
                     Theme.FontTiny, Theme.Dim, 92, 377);
             }
             WindowFx.DrawBorder(this, e);
@@ -786,11 +786,11 @@ namespace SkyMatch
             Font = Theme.FontBody;
 
             _header = new DialogHeader(this);
-            _header.Subtitle = "搜索城市 · 精确到城市级别";
+            _header.Subtitle = "Search cities · Accurate to the city level";
             _header.Dock = DockStyle.Top;
 
             _search = new SearchBox();
-            _search.Placeholder = "输入城市名，例如 南京 / 东京 / London";
+            _search.Placeholder = "Enter the city name, such as Nanjing / Tokyo / London";
             _search.Size = new Size(380, 38);
             _search.InnerTextBox.KeyDown += async delegate(object sender, KeyEventArgs e)
             {
@@ -798,7 +798,7 @@ namespace SkyMatch
             };
 
             _go = new ActionButton();
-            _go.Text = "搜索";
+            _go.Text = "Search";
             _go.Primary = true;
             _go.Pill = true;
             _go.Size = new Size(96, 38);
@@ -810,7 +810,7 @@ namespace SkyMatch
             _status.BackColor = Color.Transparent;
             _status.ForeColor = Theme.Dim;
             _status.Font = Theme.FontSmall;
-            _status.Text = "搜索后点击结果即可切换位置。";
+            _status.Text = "After searching, click on the result to switch locations.";
             _status.TextAlign = ContentAlignment.MiddleLeft;
 
             _results = new Panel();
@@ -834,9 +834,9 @@ namespace SkyMatch
             List<LocationInfo> history = _controller.GetLocationHistory();
             if (history == null || history.Count == 0) return;
             _status.ForeColor = Theme.Dim;
-            _status.Text = "最近搜索 · 点击直接切换";
+            _status.Text = "Recent searches · Click to switch directly";
             Label title = new Label();
-            title.Text = "最近搜索";
+            title.Text = "Recent searches";
             title.AutoSize = false;
             title.BackColor = Color.Transparent;
             title.ForeColor = Theme.Dim;
@@ -868,23 +868,23 @@ namespace SkyMatch
             string query = _search.Text == null ? "" : _search.Text.Trim();
             if (query.Length == 0)
             {
-                _status.Text = "请输入城市名。";
+                _status.Text = "Please enter a city name.";
                 return;
             }
             _busy = true;
             _go.Enabled = false;
             _status.ForeColor = Theme.Muted;
-            _status.Text = "正在搜索「" + query + "」…";
+            _status.Text = "Searching for \"" + query + "」…";
             try
             {
                 List<LocationInfo> results = await _controller.SearchCitiesAsync(query);
                 _results.Controls.Clear();
                 if (results.Count == 0)
                 {
-                    _status.Text = "没有找到这个城市，换一个写法试试。";
+                    _status.Text = "This city is not found, try another way of writing it.";
                     return;
                 }
-                _status.Text = "找到 " + results.Count + " 个结果，点击选择。";
+                _status.Text = "turn up" + results.Count + "results, click to select.";
                 int y = 0;
                 foreach (LocationInfo location in results)
                 {
@@ -905,7 +905,7 @@ namespace SkyMatch
             catch (Exception ex)
             {
                 _status.ForeColor = Theme.Red;
-                _status.Text = "搜索失败：" + ex.Message;
+                _status.Text = "Search failed:" + ex.Message;
             }
             finally
             {

@@ -309,7 +309,7 @@ namespace SkyMatch
             if (blankPreview && item.IsRemote)
             {
                 heuristic.IsSuitable = false;
-                heuristic.ExcludeReason = "预览为单色块，已过滤";
+                heuristic.ExcludeReason = "Solid-color preview; filtered";
                 heuristic.PeopleScanned = true;
                 return heuristic;
             }
@@ -360,12 +360,12 @@ namespace SkyMatch
                 clip.TimeScores.TryGetValue(slot, out value);
                 result.TimeScores[slot] = value;
             }
-            result.Reason = "CLIP 识图 · " + (result.CharacterFocus ? "主人物" : "主风景")
-                + " · 天气「" + WeatherKindInfo.Name(clip.Weather) + "」"
-                + (useHeuristicWeather ? "（文字修正为「" + WeatherKindInfo.Name(heuristic.Primary) + "」）" : "")
-                + " · 时段「" + TimeSlotInfo.Name(clip.Time) + "」"
-                + " · 天气 " + Math.Round(clip.WeatherConfidence) + "%"
-                + " · 时段 " + Math.Round(clip.TimeConfidence) + "%";
+            result.Reason = "CLIP vision · " + (result.CharacterFocus ? "character focus" : "scenery")
+                + " · weather \"" + WeatherKindInfo.Name(clip.Weather) + "\""
+                + (useHeuristicWeather ? " (text corrected to \"" + WeatherKindInfo.Name(heuristic.Primary) + "\")" : "")
+                + " · time \"" + TimeSlotInfo.Name(clip.Time) + "\""
+                + " · weather " + Math.Round(clip.WeatherConfidence) + "%"
+                + " · time " + Math.Round(clip.TimeConfidence) + "%";
             result.TimeReason = result.Reason;
             return result;
         }
@@ -485,8 +485,8 @@ namespace SkyMatch
                 item.PrimaryWeather = (WeatherKind)manualValue;
                 item.Confidence = 100;
                 string autoName = WeatherKindInfo.Name(item.AutoPrimaryWeather);
-                item.Reason = "已手动锁定为「" + WeatherKindInfo.Name(item.PrimaryWeather)
-                    + "」" + (item.AutoPrimaryWeather == item.PrimaryWeather ? "" : "，自动识别原为「" + autoName + "」");
+                item.Reason = "Manually locked to \"" + WeatherKindInfo.Name(item.PrimaryWeather)
+                    + "\"" + (item.AutoPrimaryWeather == item.PrimaryWeather ? "" : ", auto result was \"" + autoName + "\"");
             }
             else
             {
@@ -507,7 +507,7 @@ namespace SkyMatch
             item.AutoReason = c.Reason;
             item.IsSuitable = (item.IsRemote && item.BlankPreview) ? false : c.IsSuitable;
             item.ExcludeReason = (item.IsRemote && item.BlankPreview)
-                ? "预览为单色块，已过滤" : c.ExcludeReason;
+                ? "Solid-color preview; filtered" : c.ExcludeReason;
             item.CharacterFocus = c.CharacterFocus;
             item.HasPeople = c.HasPeople;
             item.PeopleScanned = c.PeopleScanned;
@@ -583,7 +583,7 @@ namespace SkyMatch
             foreach (string term in HardRejectTerms)
             {
                 if (ContainsKeyword(text, term))
-                    return "不适合作为桌面壁纸：包含「" + term + "」";
+                    return "Not suitable as a desktop wallpaper: contains \"" + term + "\"";
             }
             return "";
         }
@@ -729,18 +729,18 @@ namespace SkyMatch
             string visual;
             switch (slot)
             {
-                case TimeSlot.Dawn: visual = "暖色柔光与较低对比的清晨感"; break;
-                case TimeSlot.Day: visual = "明亮通透的日间光线"; break;
-                case TimeSlot.Dusk: visual = "暖橙或紫色、较低角度的黄昏光"; break;
-                default: visual = "深色夜景、月光或霓虹高光"; break;
+                case TimeSlot.Dawn: visual = "warm, soft light and low contrast"; break;
+                case TimeSlot.Day: visual = "bright, open daylight"; break;
+                case TimeSlot.Dusk: visual = "warm orange or purple low-angle light"; break;
+                default: visual = "dark night, moonlight, or neon highlights"; break;
             }
             List<string> found = hits.ContainsKey(slot) ? hits[slot] : new List<string>();
             if (found.Count > 0)
             {
-                if (noImage) return "文字线索「" + found[0] + "」";
-                return "文字线索「" + found[0] + "」·" + visual;
+                if (noImage) return "Text cue \"" + found[0] + "\"";
+                return "Text cue \"" + found[0] + "\" · " + visual;
             }
-            return noImage ? "按标题与标签推断" : visual;
+            return noImage ? "Inferred from title and tags" : visual;
         }
 
         private static double VisualScore(WeatherKind kind, VisualFeatures f)
@@ -792,25 +792,25 @@ namespace SkyMatch
             string visual;
             switch (top)
             {
-                case WeatherKind.ClearDay: visual = "画面明亮、带暖色光"; break;
-                case WeatherKind.ClearNight: visual = "暗色画面与冷色高光"; break;
-                case WeatherKind.Cloudy: visual = "柔和低饱和的云层色调"; break;
-                case WeatherKind.Overcast: visual = "灰蓝、低饱和的暗调"; break;
-                case WeatherKind.Rain: visual = "冷蓝灰影调"; break;
-                case WeatherKind.Storm: visual = "高对比暗调与强烈色光"; break;
-                case WeatherKind.Snow: visual = "高亮、冷白的画面"; break;
-                case WeatherKind.Fog: visual = "低对比、朦胧的灰调"; break;
-                default: visual = "画面色调"; break;
+                case WeatherKind.ClearDay: visual = "bright image with warm light"; break;
+                case WeatherKind.ClearNight: visual = "dark image with cool highlights"; break;
+                case WeatherKind.Cloudy: visual = "soft, low-saturation clouds"; break;
+                case WeatherKind.Overcast: visual = "grey-blue, low-saturation tones"; break;
+                case WeatherKind.Rain: visual = "cool blue-grey tones"; break;
+                case WeatherKind.Storm: visual = "high-contrast darkness and strong color"; break;
+                case WeatherKind.Snow: visual = "bright, cold-white image"; break;
+                case WeatherKind.Fog: visual = "low-contrast, hazy grey tones"; break;
+                default: visual = "image tones"; break;
             }
 
             List<string> found = hits.ContainsKey(top) ? hits[top] : new List<string>();
             if (found.Count > 0)
             {
                 string word = found[0];
-                if (noImage) return "文字线索「" + word + "」";
-                return "文字线索「" + word + "」·" + visual;
+                if (noImage) return "Text cue \"" + word + "\"";
+                return "Text cue \"" + word + "\" · " + visual;
             }
-            return noImage ? "按标题与标签推断" : visual;
+            return noImage ? "Inferred from title and tags" : visual;
         }
 
         private static readonly Dictionary<string, VisualFeatures> PreviewFeatureCache =

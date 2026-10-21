@@ -71,7 +71,7 @@ namespace SkyMatch
             WeatherGlyph.Draw(e.Graphics, WeatherKind.ClearDay,
                 new RectangleF(logo.X + 4, logo.Y + 4, 22, 22), Color.FromArgb(20, 24, 30), 255);
             Theme.DrawText(e.Graphics, "SkyMatch", Theme.FontBold, Theme.Text, 59, 11);
-            Theme.DrawText(e.Graphics, "天幕 · 天气壁纸", Theme.FontTiny, Theme.Dim, 60, 31);
+            Theme.DrawText(e.Graphics, "Sky-aware · Weather Wallpaper", Theme.FontTiny, Theme.Dim, 60, 31);
 
             if (Width > 1000)
             {
@@ -90,7 +90,7 @@ namespace SkyMatch
         private readonly NavButton[] _nav;
         private readonly ToggleSwitch _autoToggle;
         private readonly VolumeSlider _volume;
-        private readonly string[] _captions = { "天气总览", "壁纸库", "工坊精选", "设置" };
+        private readonly string[] _captions = { "Weather", "Library", "Workshop", "Settings" };
         private int _activePage;
         private RectangleF _engineRect;
         private RectangleF _volumeRect;
@@ -257,18 +257,18 @@ namespace SkyMatch
             using (Pen border = new Pen(Theme.BorderSoft, 1f))
                 e.Graphics.DrawLine(border, Width - 1, 0, Width - 1, Height);
 
-            Theme.DrawText(e.Graphics, "工作台", Theme.FontTiny, Theme.Dim, 20, 18);
+            Theme.DrawText(e.Graphics, "Workspace", Theme.FontTiny, Theme.Dim, 20, 18);
 
             RectangleF auto = AutoCardRect;
             using (SolidBrush brush = new SolidBrush(Color.FromArgb(17, 22, 30)))
                 Theme.FillRounded(e.Graphics, brush, auto, 13);
             using (Pen pen = new Pen(Theme.BorderSoft, 1f))
                 Theme.DrawRounded(e.Graphics, pen, auto, 13);
-            Theme.DrawText(e.Graphics, "自动跟随", Theme.FontBold, Theme.Text, auto.X + 14, auto.Y + 14);
-            Theme.DrawText(e.Graphics, "天气变化时切换", Theme.FontTiny, Theme.Dim, auto.X + 14, auto.Y + 36);
+            Theme.DrawText(e.Graphics, "Auto-follow", Theme.FontBold, Theme.Text, auto.X + 14, auto.Y + 14);
+            Theme.DrawText(e.Graphics, "Follow weather changes", Theme.FontTiny, Theme.Dim, auto.X + 14, auto.Y + 36);
             using (SolidBrush dot = new SolidBrush(AutoFollow ? Theme.Green : Theme.Dim))
                 e.Graphics.FillEllipse(dot, auto.X + 14, auto.Y + 64, 6, 6);
-            Theme.DrawText(e.Graphics, (AutoFollow ? "运行中" : "已暂停") + "  ·  每小时天气",
+            Theme.DrawText(e.Graphics, (AutoFollow ? "Running" : "Suspended") + "  ·  Hourly weather",
                 Theme.FontTiny, AutoFollow ? Theme.Alpha(Theme.Green, 230) : Theme.Dim, auto.X + 26, auto.Y + 59);
 
             RectangleF volume = _volumeRect;
@@ -276,12 +276,12 @@ namespace SkyMatch
                 Theme.FillRounded(e.Graphics, brush, volume, 13);
             using (Pen pen = new Pen(Theme.BorderSoft, 1f))
                 Theme.DrawRounded(e.Graphics, pen, volume, 13);
-            Theme.DrawText(e.Graphics, "桌面音量", Theme.FontBold, Theme.Text, volume.X + 14, volume.Y + 12);
-            Theme.DrawText(e.Graphics, _muted ? "静音" : _volumePercent + "%", Theme.FontTiny,
+            Theme.DrawText(e.Graphics, "Desktop volume", Theme.FontBold, Theme.Text, volume.X + 14, volume.Y + 12);
+            Theme.DrawText(e.Graphics, _muted ? "mute" : _volumePercent + "%", Theme.FontTiny,
                 _muted ? Theme.Red : Theme.TimeColor(TimeSlot.Dusk), volume.X + 78, volume.Y + 15);
             if (volume.Height >= 90)
             {
-                Theme.DrawText(e.Graphics, "仅调整 Wallpaper Engine 的声音", Theme.FontTiny, Theme.Dim,
+                Theme.DrawText(e.Graphics, "Wallpaper Engine audio only", Theme.FontTiny, Theme.Dim,
                     volume.X + 14, volume.Y + 72);
             }
 
@@ -294,11 +294,11 @@ namespace SkyMatch
             Color dotColor = !_engineReady ? Theme.Red : (_engineRunning ? Theme.Green : Theme.Yellow);
             using (SolidBrush dot = new SolidBrush(dotColor))
                 e.Graphics.FillEllipse(dot, engine.X + 14, engine.Y + 43, 7, 7);
-            string line = !_engineReady ? "未连接" : (_engineRunning ? "已连接" : "等待启动");
+            string line = !_engineReady ? "Not connected" : (_engineRunning ? "Connected" : "Waiting to start");
             Theme.DrawText(e.Graphics, line, Theme.FontSmall, Theme.Text, engine.X + 28, engine.Y + 36);
-            Theme.DrawText(e.Graphics, _wallpaperCount + " 张壁纸参与匹配", Theme.FontTiny, Theme.Muted,
+            Theme.DrawText(e.Graphics, _wallpaperCount + " wallpapers matched", Theme.FontTiny, Theme.Muted,
                 engine.X + 14, engine.Y + 61);
-            Theme.DrawText(e.Graphics, "打开设置  →", Theme.FontTiny, Theme.Alpha(Theme.Yellow, 210),
+            Theme.DrawText(e.Graphics, "Open settings →", Theme.FontTiny, Theme.Alpha(Theme.Yellow, 210),
                 engine.X + 14, engine.Y + 88);
 
             Theme.DrawText(e.Graphics, "v1.2.0  ·  LOCAL ONLY", Theme.FontTiny, Color.FromArgb(62, 73, 87),
@@ -308,7 +308,7 @@ namespace SkyMatch
 
     public class StatusBar : Control
     {
-        private string _message = "正在启动…";
+        private string _message = "Starting...";
         private string _rightText = "";
         private bool _isError;
         private bool _isBusy;

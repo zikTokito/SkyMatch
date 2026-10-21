@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
@@ -91,7 +91,7 @@ namespace SkyMatch
             _initialPage = initialPage;
             _controller = new AppController();
 
-            Text = "SkyMatch · 天气壁纸";
+            Text = "SkyMatch · Weather Wallpaper";
             FormBorderStyle = FormBorderStyle.None;
             StartPosition = FormStartPosition.CenterScreen;
             Rectangle working = Screen.PrimaryScreen.WorkingArea;
@@ -195,16 +195,16 @@ namespace SkyMatch
             _trayMenu.ForeColor = Theme.Text;
             _trayMenu.Font = Theme.FontSmall;
             _trayMenu.Renderer = new ToolStripProfessionalRenderer(new DarkMenuColors());
-            ToolStripMenuItem open = new ToolStripMenuItem("打开 SkyMatch");
+            ToolStripMenuItem open = new ToolStripMenuItem("Open SkyMatch");
             open.Font = Theme.FontBold;
             open.Click += delegate { ShowFromTray(); };
-            ToolStripMenuItem match = new ToolStripMenuItem("立即按天气匹配");
+            ToolStripMenuItem match = new ToolStripMenuItem("Match by weather now");
             match.Click += async delegate
             {
                 ShowFromTray();
                 await _controller.MatchCurrentWeatherAsync();
             };
-            _trayAuto = new ToolStripMenuItem("自动跟随");
+            _trayAuto = new ToolStripMenuItem("Auto-follow");
             _trayAuto.CheckOnClick = false;
             _trayAuto.Click += delegate
             {
@@ -215,9 +215,9 @@ namespace SkyMatch
                     Task ignored = _controller.MatchCurrentWeatherAsync();
                 }
             };
-            ToolStripMenuItem restore = new ToolStripMenuItem("恢复最初壁纸");
+            ToolStripMenuItem restore = new ToolStripMenuItem("Restore original wallpaper");
             restore.Click += async delegate { await _controller.RestoreOriginalAsync(); };
-            ToolStripMenuItem exit = new ToolStripMenuItem("退出");
+            ToolStripMenuItem exit = new ToolStripMenuItem("quit");
             exit.Click += delegate { ExitApplication(); };
             _trayMenu.Items.Add(open);
             _trayMenu.Items.Add(match);
@@ -229,7 +229,7 @@ namespace SkyMatch
 
             _tray = new NotifyIcon();
             _tray.Icon = Icon;
-            _tray.Text = "SkyMatch · 正在同步天气";
+            _tray.Text = "SkyMatch · Synchronizing weather";
             _tray.Visible = true;
             _tray.ContextMenuStrip = _trayMenu;
             _tray.DoubleClick += delegate { ShowFromTray(); };
@@ -270,7 +270,7 @@ namespace SkyMatch
                     await _controller.CheckWorkshopRefreshDueAsync();
                     await _controller.CheckRecommendationRotationAsync();
                 }
-                catch (Exception ex) { Log.Warn("后台同步失败：" + ex.Message); }
+                catch (Exception ex) { Log.Warn("Background sync failed:" + ex.Message); }
             };
             _subscriptionTimer.Start();
 
@@ -369,8 +369,8 @@ namespace SkyMatch
             }
             catch (Exception ex)
             {
-                Log.Error("初始化失败", ex);
-                _status.Message = "初始化失败：" + ex.Message;
+                Log.Error("Initialization failed", ex);
+                _status.Message = "Initialization failed:" + ex.Message;
                 _status.IsError = true;
             }
             _dashboard.RefreshData();
@@ -380,8 +380,8 @@ namespace SkyMatch
             _library.RefreshView();
             if (_startMinimized && _controller.Settings.ShowNotifications)
             {
-                _tray.ShowBalloonTip(2500, "SkyMatch 已在后台运行",
-                    "天气变化时会在后台自动更换壁纸。双击托盘图标打开。", ToolTipIcon.None);
+                _tray.ShowBalloonTip(2500, "SkyMatch is running in the background",
+                    "The wallpaper will automatically change in the background when the weather changes. Double-click the tray icon to open it.", ToolTipIcon.None);
             }
             if (_initialPage == 4) _sidebar.SetActivePage(3);
             else if (_initialPage > 0) _sidebar.SetActivePage(_initialPage);
@@ -537,7 +537,7 @@ namespace SkyMatch
         {
             if (_controller.Settings.ShowNotifications && (!Visible || e.Automatic))
             {
-                _tray.ShowBalloonTip(3000, e.Automatic ? "壁纸已随天气切换" : "壁纸已切换",
+                _tray.ShowBalloonTip(3000, e.Automatic ? "The wallpaper has changed with the weather" : "Wallpaper switched",
                     "《" + e.Wallpaper.Title + "》\n" + WeatherKindInfo.Name(_controller.Weather == null
                         ? e.Wallpaper.MatchWeather : _controller.Weather.Current.Kind), ToolTipIcon.None);
             }
@@ -547,11 +547,11 @@ namespace SkyMatch
 
         private string BuildStatusRight()
         {
-            string right = (_controller.Settings.AutoFollow ? "自动跟随 ON" : "自动跟随 PAUSED")
-                + "  ·  每小时天气"
+            string right = (_controller.Settings.AutoFollow ? "Auto follow ON" : "Automatically follow PAUSED")
+                + "  ·  Hourly weather"
                 + "  ·  " + DateTime.Now.ToString("HH:mm:ss");
             if (_controller.Weather != null)
-                right += "  ·  " + Theme.Clock(_controller.Weather.FetchedAt) + " 更新";
+                right += "  ·  " + Theme.Clock(_controller.Weather.FetchedAt) + "renew";
             return right;
         }
 
@@ -584,8 +584,8 @@ namespace SkyMatch
                 if (!_hintShown && _controller.Settings.ShowNotifications)
                 {
                     _hintShown = true;
-                    _tray.ShowBalloonTip(2500, "SkyMatch 仍在运行",
-                        "已最小化到托盘。右键托盘图标可以退出。", ToolTipIcon.None);
+                    _tray.ShowBalloonTip(2500, "SkyMatch is still running",
+                        "Minimized to tray. Right-click the tray icon to exit.", ToolTipIcon.None);
                 }
                 return;
             }

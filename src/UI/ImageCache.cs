@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -28,7 +28,7 @@ namespace SkyMatch
                 }
                 catch (Exception ex)
                 {
-                    Log.Warn("生成缩略图失败：" + item.Id + " | " + ex.Message);
+                    Log.Warn("Failed to generate thumbnail:" + item.Id + " | " + ex.Message);
                 }
             }
         }
@@ -162,7 +162,7 @@ namespace SkyMatch
             }
             catch (Exception ex)
             {
-                Log.Warn("加载壁纸预览失败：" + path + " | " + ex.Message);
+                Log.Warn("Failed to load wallpaper preview:" + path + " | " + ex.Message);
                 return null;
             }
         }
@@ -191,7 +191,7 @@ namespace SkyMatch
             }
             catch (Exception ex)
             {
-                Log.Warn("加载壁纸预览失败：" + path + " | " + ex.Message);
+                Log.Warn("Failed to load wallpaper preview:" + path + " | " + ex.Message);
                 return null;
             }
         }

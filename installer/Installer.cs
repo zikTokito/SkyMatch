@@ -40,7 +40,7 @@ namespace SkyMatchSetup
             _noLaunch = HasArg("--no-launch");
             _noShortcuts = HasArg("--no-shortcuts");
 
-            Text = "SkyMatch 1.2.0 安装程序";
+            Text = "SkyMatch 1.2.0 Setup";
             FormBorderStyle = FormBorderStyle.FixedDialog;
             MaximizeBox = false;
             MinimizeBox = false;
@@ -60,7 +60,7 @@ namespace SkyMatchSetup
             Controls.Add(title);
 
             _status = new Label();
-            _status.Text = "正在准备安装…";
+            _status.Text = "Preparing installation...";
             _status.AutoSize = false;
             _status.Location = new Point(24, 58);
             _status.Size = new Size(430, 24);
@@ -76,7 +76,7 @@ namespace SkyMatchSetup
             Controls.Add(_progress);
 
             Label note = new Label();
-            note.Text = "纯净版 · 不包含缓存、历史记录或用户设置";
+            note.Text = "Clean build - no cache, history, or user settings";
             note.AutoSize = false;
             note.Location = new Point(24, 120);
             note.Size = new Size(430, 22);
@@ -134,7 +134,7 @@ namespace SkyMatchSetup
                     {
                         BeginInvoke(new Action(delegate
                         {
-                            MessageBox.Show(this, "SkyMatch 正在运行，请先退出程序再安装。", "SkyMatch",
+                            MessageBox.Show(this, "SkyMatch is running. Please close it before installing.", "SkyMatch",
                                 MessageBoxButtons.OK, MessageBoxIcon.Information);
                             Close();
                         }));
@@ -142,13 +142,13 @@ namespace SkyMatchSetup
                     }
                 }
 
-                Report(2, "正在清理旧版本…");
+                Report(2, "Removing the previous version...");
                 if (Directory.Exists(_destination)) Directory.Delete(_destination, true);
                 Directory.CreateDirectory(_destination);
 
                 using (Stream payload = Assembly.GetExecutingAssembly().GetManifestResourceStream("payload.zip"))
                 {
-                    if (payload == null) throw new InvalidOperationException("安装包数据损坏。");
+                    if (payload == null) throw new InvalidOperationException("The installer payload is corrupted.");
                     using (ZipArchive archive = new ZipArchive(payload, ZipArchiveMode.Read))
                     {
                         int total = Math.Max(1, archive.Entries.Count);
@@ -173,12 +173,12 @@ namespace SkyMatchSetup
                                 }
                             }
                             Report(5 + (int)(index * 85.0 / total),
-                                "正在安装 " + index + " / " + total + " …");
+                                "Installing " + index + " / " + total + " …");
                         }
                     }
                 }
 
-                Report(94, "正在创建快捷方式…");
+                Report(94, "Creating shortcuts...");
                 BeginInvoke(new Action(FinishInstall));
             }
             catch (Exception ex)
@@ -186,7 +186,7 @@ namespace SkyMatchSetup
                 BeginInvoke(new Action(delegate
                 {
                     if (_closing) return;
-                    MessageBox.Show(this, "安装失败：" + ex.Message, "SkyMatch",
+                    MessageBox.Show(this, "Installation failed: " + ex.Message, "SkyMatch",
                         MessageBoxButtons.OK, MessageBoxIcon.Error);
                     Close();
                 }));
@@ -198,7 +198,7 @@ namespace SkyMatchSetup
             try
             {
                 string exe = Path.Combine(_destination, "SkyMatch.exe");
-                if (!File.Exists(exe)) throw new InvalidOperationException("安装文件不完整。");
+                if (!File.Exists(exe)) throw new InvalidOperationException("Installation files are incomplete.");
                 if (!_noShortcuts)
                 {
                     CreateShortcut(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory),
@@ -206,14 +206,14 @@ namespace SkyMatchSetup
                     CreateShortcut(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Programs),
                         "SkyMatch.lnk"), exe);
                 }
-                Report(100, "安装完成。");
+                Report(100, "Installation complete.");
                 if (!_noLaunch) Process.Start(new ProcessStartInfo(exe) { WorkingDirectory = _destination });
                 _closing = true;
                 Close();
             }
             catch (Exception ex)
             {
-                MessageBox.Show(this, "创建快捷方式失败：" + ex.Message, "SkyMatch",
+                MessageBox.Show(this, "Failed to create shortcuts: " + ex.Message, "SkyMatch",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
                 _closing = true;
                 Close();
@@ -234,7 +234,7 @@ namespace SkyMatchSetup
             shortcutType.InvokeMember("IconLocation", BindingFlags.SetProperty, null, shortcut,
                 new object[] { exe + ",0" });
             shortcutType.InvokeMember("Description", BindingFlags.SetProperty, null, shortcut,
-                new object[] { "SkyMatch 天气壁纸" });
+                new object[] { "SkyMatch Weather Wallpaper" });
             shortcutType.InvokeMember("Save", BindingFlags.InvokeMethod, null, shortcut, null);
         }
     }

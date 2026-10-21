@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Text;
@@ -252,11 +252,11 @@ namespace SkyMatch
         public static string Greeting()
         {
             int hour = DateTime.Now.Hour;
-            if (hour < 5) return "夜深了";
-            if (hour < 11) return "早上好";
-            if (hour < 14) return "中午好";
-            if (hour < 18) return "下午好";
-            return "晚上好";
+            if (hour < 5) return "It's late at night";
+            if (hour < 11) return "Good morning";
+            if (hour < 14) return "good afternoon";
+            if (hour < 18) return "good afternoon";
+            return "Good evening";
         }
     }
 

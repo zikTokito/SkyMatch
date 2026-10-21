@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -45,7 +45,7 @@ namespace SkyMatch
             }
             catch (Exception ex)
             {
-                Log.Error("读取设置失败，将使用默认设置", ex);
+                Log.Error("Failed to read settings, default settings will be used", ex);
                 return new AppSettings();
             }
         }
@@ -69,7 +69,7 @@ namespace SkyMatch
             if (String.IsNullOrEmpty(settings.Timezone)) settings.Timezone = "Asia/Shanghai";
             if (settings.Latitude < -90 || settings.Latitude > 90) settings.HasLocation = false;
             if (settings.Longitude < -180 || settings.Longitude > 180) settings.HasLocation = false;
-            if (settings.HasLocation && String.IsNullOrEmpty(settings.City)) settings.City = "当前位置";
+            if (settings.HasLocation && String.IsNullOrEmpty(settings.City)) settings.City = "Current location";
             if (settings.LocationHistory == null) settings.LocationHistory = new List<LocationInfo>();
             settings.LocationHistory.RemoveAll(delegate(LocationInfo item)
             {
@@ -112,7 +112,7 @@ namespace SkyMatch
             }
             catch (Exception ex)
             {
-                Log.Error("保存设置失败", ex);
+                Log.Error("Failed to save settings", ex);
             }
         }
 
@@ -206,7 +206,7 @@ namespace SkyMatch
             }
             catch (Exception ex)
             {
-                Log.Error("缓存天气失败", ex);
+                Log.Error("Caching weather failed", ex);
             }
         }
 
@@ -228,7 +228,7 @@ namespace SkyMatch
             }
             catch (Exception ex)
             {
-                Log.Error("读取天气缓存失败", ex);
+                Log.Error("Failed to read weather cache", ex);
                 return null;
             }
         }
@@ -275,7 +275,7 @@ namespace SkyMatch
             }
             catch (Exception ex)
             {
-                Log.Error("设置开机启动失败", ex);
+                Log.Error("Setting startup failed", ex);
             }
         }
     }

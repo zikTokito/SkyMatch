@@ -59,7 +59,7 @@ namespace SkyMatch
         {
             string text = await GetStringAsync(url, timeoutSeconds).ConfigureAwait(false);
             Dictionary<string, object> result = Json.Object(Json.Parse(text));
-            if (result == null) throw new InvalidOperationException("接口返回的不是有效 JSON 对象");
+            if (result == null) throw new InvalidOperationException("The interface returns not a valid JSON object");
             return result;
         }
 
@@ -103,29 +103,29 @@ namespace SkyMatch
     {
         public static string Describe(int code)
         {
-            if (code == 0) return "晴朗";
-            if (code == 1) return "大致晴朗";
-            if (code == 2) return "多云";
-            if (code == 3) return "阴天";
-            if (code == 45 || code == 48) return "有雾";
-            if (code == 51 || code == 53 || code == 55) return "毛毛雨";
-            if (code == 56 || code == 57) return "冻毛毛雨";
-            if (code == 61) return "小雨";
-            if (code == 63) return "中雨";
-            if (code == 65) return "大雨";
-            if (code == 66 || code == 67) return "冻雨";
-            if (code == 71) return "小雪";
-            if (code == 73) return "中雪";
-            if (code == 75) return "大雪";
-            if (code == 77) return "米雪";
-            if (code == 80) return "阵雨";
-            if (code == 81) return "强阵雨";
-            if (code == 82) return "暴雨";
-            if (code == 85) return "阵雪";
-            if (code == 86) return "强阵雪";
-            if (code == 95) return "雷阵雨";
-            if (code == 96 || code == 99) return "雷暴伴冰雹";
-            return "天气变化";
+            if (code == 0) return "Clear";
+            if (code == 1) return "Mostly clear";
+            if (code == 2) return "Partly cloudy";
+            if (code == 3) return "Overcast";
+            if (code == 45 || code == 48) return "Fog";
+            if (code == 51 || code == 53 || code == 55) return "Drizzle";
+            if (code == 56 || code == 57) return "Freezing drizzle";
+            if (code == 61) return "Light rain";
+            if (code == 63) return "Rain";
+            if (code == 65) return "Heavy rain";
+            if (code == 66 || code == 67) return "Freezing rain";
+            if (code == 71) return "Light snow";
+            if (code == 73) return "Snow";
+            if (code == 75) return "Heavy snow";
+            if (code == 77) return "Snow grains";
+            if (code == 80) return "Rain showers";
+            if (code == 81) return "Heavy showers";
+            if (code == 82) return "Violent showers";
+            if (code == 85) return "Snow showers";
+            if (code == 86) return "Heavy snow showers";
+            if (code == 95) return "Thunderstorm";
+            if (code == 96 || code == 99) return "Thunderstorm with hail";
+            return "Changing weather";
         }
 
         public static WeatherKind Kind(int code, bool isDay)
@@ -168,7 +168,7 @@ namespace SkyMatch
             }
             catch (Exception ex) { errors.Add("ipwho: " + ex.Message); }
 
-            throw new LocationResolutionException("无法通过 IP 获取位置，请手动搜索城市。" +
+            throw new LocationResolutionException("Unable to get location by IP, please search for city manually." +
                 (errors.Count > 0 ? "（" + String.Join("；", errors.ToArray()) + "）" : ""));
         }
 
@@ -197,7 +197,7 @@ namespace SkyMatch
         private async Task<LocationInfo> TryIpApiAsync()
         {
             Dictionary<string, object> json = await Http.GetJsonObjectAsync(
-                "http://ip-api.com/json/?lang=zh-CN&fields=status,message,country,regionName,city,lat,lon,timezone,isp",
+                "http://ip-api.com/json/?lang=en&fields=status,message,country,regionName,city,lat,lon,timezone,isp",
                 10).ConfigureAwait(false);
             if (Json.GetString(json, "status") != "success") return null;
             double lat = Json.GetDouble(json, "lat", 0);
@@ -243,7 +243,7 @@ namespace SkyMatch
             {
                 string url = "https://api.bigdatacloud.net/data/reverse-geocode-client?latitude="
                     + Http.Invariant(location.Latitude, 6) + "&longitude=" + Http.Invariant(location.Longitude, 6)
-                    + "&localityLanguage=zh-Hans";
+                    + "&localityLanguage=en";
                 Dictionary<string, object> json = await Http.GetJsonObjectAsync(url, 8).ConfigureAwait(false);
                 string city = Json.GetString(json, "city");
                 string locality = Json.GetString(json, "locality");
@@ -265,9 +265,9 @@ namespace SkyMatch
                         string name = Json.GetString(entry, "name");
                         int level = Json.GetInt(entry, "adminLevel", 0);
                         if (String.IsNullOrEmpty(name) || name == location.Name || name == province) continue;
-                        if (level >= 6 || name.EndsWith("区", StringComparison.Ordinal)
-                            || name.EndsWith("县", StringComparison.Ordinal)
-                            || name.EndsWith("旗", StringComparison.Ordinal))
+                        if (level >= 6 || name.EndsWith("district", StringComparison.Ordinal)
+                            || name.EndsWith("county", StringComparison.Ordinal)
+                            || name.EndsWith("flag", StringComparison.Ordinal))
                         {
                             district = name;
                             break;
@@ -278,7 +278,7 @@ namespace SkyMatch
             }
             catch (Exception ex)
             {
-                Log.Warn("反向地理编码失败，保留原始地名：" + ex.Message);
+                Log.Warn("Reverse geocoding fails, retaining original place names:" + ex.Message);
             }
             return location;
         }
@@ -288,7 +288,7 @@ namespace SkyMatch
             List<LocationInfo> result = new List<LocationInfo>();
             if (String.IsNullOrWhiteSpace(query)) return result;
             string url = "https://geocoding-api.open-meteo.com/v1/search?name=" + Http.Escape(query.Trim())
-                + "&count=8&language=zh&format=json";
+                + "&count=8&language=en&format=json";
             Dictionary<string, object> json = await Http.GetJsonObjectAsync(url, 12).ConfigureAwait(false);
             List<Dictionary<string, object>> items = Json.ObjectList(json, "results");
             foreach (Dictionary<string, object> item in items)
@@ -303,7 +303,7 @@ namespace SkyMatch
                 loc.Longitude = Json.GetDouble(item, "longitude", 0);
                 loc.Timezone = GetStringOr(item, "timezone", "Asia/Shanghai");
                 loc.IsApproximate = false;
-                loc.Source = "城市搜索";
+                loc.Source = "City search";
                 bool duplicate = false;
                 foreach (LocationInfo existing in result)
                 {
@@ -332,7 +332,7 @@ namespace SkyMatch
             Dictionary<string, object> current = Json.GetObject(json, "current");
             Dictionary<string, object> daily = Json.GetObject(json, "daily");
             Dictionary<string, object> hourly = Json.GetObject(json, "hourly");
-            if (current == null || daily == null) throw new InvalidOperationException("天气接口缺少 current/daily 数据");
+            if (current == null || daily == null) throw new InvalidOperationException("The weather interface is missing current/daily data");
 
             WeatherData data = new WeatherData();
             data.Location = location;

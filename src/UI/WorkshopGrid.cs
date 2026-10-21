@@ -74,8 +74,8 @@ namespace SkyMatch
         {
             Item = item;
             Featured = featured;
-            FeaturedLabel = "最佳匹配";
-            BlockLabel = "屏蔽";
+            FeaturedLabel = "best match";
+            BlockLabel = "Block";
             SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer
                 | ControlStyles.ResizeRedraw | ControlStyles.UserPaint | ControlStyles.SupportsTransparentBackColor, true);
             BackColor = Theme.Bg;
@@ -174,7 +174,7 @@ namespace SkyMatch
 
             if (Item.IsInstalled)
             {
-                string installed = "已安装";
+                string installed = "Installed";
                 SizeF installedSize = e.Graphics.MeasureString(installed, Theme.FontTiny);
                 RectangleF badge = new RectangleF(Width - installedSize.Width - 27, 13,
                     installedSize.Width + 14, 21);
@@ -186,8 +186,8 @@ namespace SkyMatch
             int textY = imageHeight + 7;
             Theme.DrawText(e.Graphics, Theme.FitText(e.Graphics, Item.Title, Theme.FontBold, Width - 24),
                 Theme.FontBold, Theme.Text, 12, textY);
-            string meta = (Item.WorkshopSubscriptions > 0 ? Item.WorkshopSubscriptions + " 订阅" : "")
-                + (Item.IsInstalled ? "  ·  已安装" : "  ·  待订阅");
+            string meta = (Item.WorkshopSubscriptions > 0 ? Item.WorkshopSubscriptions + " subscribers" : "")
+                + (Item.IsInstalled ? "  ·  Installed" : "  ·  Not subscribed");
             Theme.DrawText(e.Graphics, meta, Theme.FontTiny,
                 Item.IsInstalled ? Theme.Green : Theme.Muted, 12, textY + 21);
 
@@ -199,7 +199,7 @@ namespace SkyMatch
             Theme.DrawText(e.Graphics, TimeSlotInfo.Name(Item.PrimaryTime), Theme.FontTiny,
                 Theme.TimeColor(Item.PrimaryTime), 92, Height - 24);
 
-            string blockLabel = String.IsNullOrEmpty(BlockLabel) ? "屏蔽" : BlockLabel;
+            string blockLabel = String.IsNullOrEmpty(BlockLabel) ? "Block" : BlockLabel;
             SizeF blockText = e.Graphics.MeasureString(blockLabel, Theme.FontBold);
             float blockWidth = Math.Max(74, blockText.Width + 24);
             _blockRect = new RectangleF(Math.Max(8, Width - blockWidth - 14), Height - 34,
@@ -275,8 +275,8 @@ namespace SkyMatch
 
             Theme.DrawText(e.Graphics, Theme.FitText(e.Graphics, Item.Title, Theme.FontBold, Width - 32),
                 Theme.FontBold, Theme.Text, 18, 258);
-            string meta = (Item.WorkshopSubscriptions > 0 ? Item.WorkshopSubscriptions + " 订阅" : "")
-                + (Item.IsInstalled ? "  ·  已安装" : "  ·  待订阅");
+            string meta = (Item.WorkshopSubscriptions > 0 ? Item.WorkshopSubscriptions + " subscribers" : "")
+                + (Item.IsInstalled ? "  ·  Installed" : "  ·  Not subscribed");
             Theme.DrawText(e.Graphics, Theme.FitText(e.Graphics, meta, Theme.FontTiny, Width - 32),
                 Theme.FontTiny, Item.IsInstalled ? Theme.Green : Theme.Muted, 18, 282);
 
@@ -287,9 +287,9 @@ namespace SkyMatch
             DrawPill(e.Graphics, 18, 323, WeatherKindInfo.Name(Item.MatchWeather), accent);
             DrawPill(e.Graphics, 98, 323, TimeSlotInfo.Name(Item.PrimaryTime),
                 Theme.TimeColor(Item.PrimaryTime));
-            Theme.DrawText(e.Graphics, "天气 " + Math.Round(Item.Confidence) + "%", Theme.FontTiny,
+            Theme.DrawText(e.Graphics, "weather" + Math.Round(Item.Confidence) + "%", Theme.FontTiny,
                 Theme.Dim, 178, 326);
-            Theme.DrawText(e.Graphics, Item.IsInstalled ? "点击卡片应用" : "点击卡片订阅",
+            Theme.DrawText(e.Graphics, Item.IsInstalled ? "Click on Card App" : "Click on the card to subscribe",
                 Theme.FontTiny, Theme.Alpha(accent, 230), Width - 105, 326);
         }
 

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
@@ -101,7 +101,7 @@ namespace SkyMatch
             }
             catch (Exception ex)
             {
-                Log.Error("保存创意工坊缓存失败", ex);
+                Log.Error("Failed to save workshop cache", ex);
             }
         }
 
@@ -120,7 +120,7 @@ namespace SkyMatch
             }
             catch (Exception ex)
             {
-                Log.Error("读取创意工坊缓存失败", ex);
+                Log.Error("Failed to read workshop cache", ex);
                 return null;
             }
         }
@@ -180,7 +180,7 @@ namespace SkyMatch
             for (int page = 1; page <= pages; page++)
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                if (progress != null) progress.Report("正在读取创意工坊订阅榜第 " + page + " / " + pages + " 页"
+                if (progress != null) progress.Report("Reading creative workshop subscription list" + page + " / " + pages + "Page"
                     + (String.IsNullOrEmpty(requiredTag) ? "" : " · " + requiredTag) + "…");
                 string url = BuildBrowseUrl(requiredTag, page, true, true);
                 string html = null;
@@ -207,25 +207,25 @@ namespace SkyMatch
                         lastError = ex.Message;
                         if (attempt < 2) continue;
                         if (page == 1)
-                            throw new InvalidOperationException("无法连接 Steam 创意工坊。"
-                                + "已尝试英文与美国商店线路；请确认当前网络可以访问 steamcommunity.com 后重试。", ex);
-                        Log.Warn("读取创意工坊第 " + page + " 页失败，保留已获取内容：" + ex.Message);
-                        result.Error = "第 " + page + " 页之后读取中断：" + ex.Message;
+                            throw new InvalidOperationException("Unable to connect to Steam Workshop."
+                                + "English and US store lines have been tried; please confirm that the current network can access steamcommunity.com and try again.", ex);
+                        Log.Warn("Read the creative workshop chapter" + page + "Page failed, retaining the obtained content:" + ex.Message);
+                        result.Error = "No." + page + "Reading breaks after page:" + ex.Message;
                         break;
                     }
                     pageItems = ParseSsrPage(html, page);
                     if (pageItems.Count == 0) pageItems = ParsePage(html, page, rank);
                     if (pageItems.Count > 0) break;
-                    lastError = "页面返回但没有解析到壁纸";
+                    lastError = "The page returns but the wallpaper is not resolved";
                 }
                 if (pageItems == null || pageItems.Count == 0)
                 {
                     if (page == 1)
                     {
-                        throw new InvalidOperationException("Steam 创意工坊页面已返回，但没有解析到壁纸。"
-                            + "可能当前网络被重定向到验证页，或页面结构变化。" + lastError);
+                        throw new InvalidOperationException("The Steam Workshop page has been returned, but no wallpapers were resolved."
+                            + "Maybe the current network is redirected to the verification page, or the page structure changes." + lastError);
                     }
-                    firstError = "第 " + page + " 页没有更多项目，已提前结束。";
+                    firstError = "No." + page + "The page has no more items and has ended early.";
                     break;
                 }
 
@@ -277,7 +277,7 @@ namespace SkyMatch
             // Keep the long tail available for ranking, but cap a pathological page response.
             if (result.Items.Count > maxItems) result.Items.RemoveRange(maxItems, result.Items.Count - maxItems);
             if (progress != null)
-                progress.Report("已读取 " + result.PagesFetched + " 页，获得 " + result.Items.Count + " 个候选壁纸");
+                progress.Report("Read" + result.PagesFetched + "page, get" + result.Items.Count + "candidate wallpapers");
             return result;
         }
 
@@ -294,7 +294,7 @@ namespace SkyMatch
             }
             catch (Exception ex)
             {
-                Log.Warn("解析工坊 SSR 数据失败：" + ex.Message);
+                Log.Warn("Failed to parse workshop SSR data:" + ex.Message);
                 return result;
             }
             List<Dictionary<string, object>> records = new List<Dictionary<string, object>>();
@@ -587,7 +587,7 @@ namespace SkyMatch
                         byte[] bytes = await Http.GetBytesAsync(candidate, 15).ConfigureAwait(false);
                         if (bytes == null || bytes.Length < 256 || bytes.Length > 8 * 1024 * 1024)
                         {
-                            lastError = "响应大小异常";
+                            lastError = "Response size exception";
                             continue;
                         }
                         string tmp = path + ".tmp";
@@ -595,7 +595,7 @@ namespace SkyMatch
                         if (!IsUsableImage(tmp))
                         {
                             try { File.Delete(tmp); } catch { }
-                            lastError = "返回内容不是有效图片";
+                            lastError = "The returned content is not a valid image";
                             continue;
                         }
                         if (File.Exists(path)) File.Delete(path);
@@ -607,12 +607,12 @@ namespace SkyMatch
                         lastError = ex.Message;
                     }
                 }
-                Log.Warn("下载工坊预览失败：" + id + " | " + lastError);
+                Log.Warn("Failed to download workshop preview:" + id + " | " + lastError);
                 return "";
             }
             catch (Exception ex)
             {
-                Log.Warn("下载工坊预览失败：" + id + " | " + ex.Message);
+                Log.Warn("Failed to download workshop preview:" + id + " | " + ex.Message);
                 return "";
             }
         }

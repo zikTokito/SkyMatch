@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -512,7 +512,7 @@ namespace SkyMatch
         private readonly TextBox _textBox;
         private bool _focused;
         private bool _hover;
-        private string _placeholder = "搜索壁纸…";
+        private string _placeholder = "Search for wallpapers…";
 
         public SearchBox()
         {
@@ -803,8 +803,8 @@ namespace SkyMatch
             TabStop = false;
             using (Graphics g = Graphics.FromHwnd(IntPtr.Zero))
             {
-                SizeF prefix = g.MeasureString("每隔", Theme.FontSmall);
-                SizeF suffix = g.MeasureString("分钟自动更换", Theme.FontSmall);
+                SizeF prefix = g.MeasureString("Every", Theme.FontSmall);
+                SizeF suffix = g.MeasureString("min", Theme.FontSmall);
                 _numberLeft = (int)Math.Ceiling(prefix.Width) + 5;
                 _suffixLeft = _numberLeft + _numberWidth + 5;
                 Width = (int)Math.Ceiling(_suffixLeft + suffix.Width) + 2;
@@ -969,8 +969,8 @@ namespace SkyMatch
             using (SolidBrush dimBrush = new SolidBrush(dim))
             using (Pen linePen = new Pen(line, 1.2f))
             {
-                g.DrawString("每隔", Theme.FontSmall, dimBrush, 0, textY);
-                g.DrawString("分钟自动更换", Theme.FontSmall, dimBrush, suffixLeft, textY);
+                g.DrawString("Every", Theme.FontSmall, dimBrush, 0, textY);
+                g.DrawString("min", Theme.FontSmall, dimBrush, suffixLeft, textY);
                 g.DrawLine(linePen, boxLeft, Height - 4, boxLeft + boxWidth, Height - 4);
                 using (StringFormat format = new StringFormat())
                 {
@@ -1311,7 +1311,7 @@ namespace SkyMatch
             Theme.DrawText(e.Graphics, title, Theme.FontTitle, Theme.Text, cx - ts.Width / 2f, cy - 58);
             using (SolidBrush accent = new SolidBrush(Theme.Yellow))
                 Theme.FillRounded(e.Graphics, accent, new RectangleF(cx - 26, cy + 2, 52, 3), 1.5f);
-            string hint = "正在加载壁纸与天气…";
+            string hint = "Loading wallpapers and weather…";
             SizeF hs = e.Graphics.MeasureString(hint, Theme.FontSmall);
             Theme.DrawText(e.Graphics, hint, Theme.FontSmall, Theme.Muted, cx - hs.Width / 2f, cy + 22);
             base.OnPaint(e);

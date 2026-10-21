@@ -71,7 +71,7 @@ namespace SkyMatch
             _settings = AppSettingsStore.Load();
             _wallpapers = new List<WallpaperItem>();
             _workshopItems = new List<WallpaperItem>();
-            _status = "正在准备…";
+            _status = "Preparing…";
             _workshopStatus = "";
             _workshopError = "";
             _nextRefreshAt = DateTime.MinValue;
@@ -192,7 +192,7 @@ namespace SkyMatch
                         if (item.BlankPreview)
                         {
                             item.IsSuitable = false;
-                            item.ExcludeReason = "预览为单色块，已过滤";
+                            item.ExcludeReason = "The preview is a single color block, filtered";
                         }
                     }
                 }).ConfigureAwait(true);
@@ -202,7 +202,7 @@ namespace SkyMatch
             }
             catch (Exception ex)
             {
-                Log.Warn("工坊黑屏预览扫描失败：" + ex.Message);
+                Log.Warn("Workshop black screen preview scan failed:" + ex.Message);
             }
             finally
             {
@@ -240,7 +240,7 @@ namespace SkyMatch
             }
             catch (Exception ex)
             {
-                Log.Warn("工坊人物扫描失败：" + ex.Message);
+                Log.Warn("Workshop character scan failed:" + ex.Message);
             }
             finally
             {
@@ -254,7 +254,7 @@ namespace SkyMatch
             _visionBusy = true;
             try
             {
-                SetStatus("正在用 CLIP L/14 全量重算匹配度…", false);
+                SetStatus("Using CLIP L/14 to fully recalculate the matching degree...", false);
                 await EnsureWorkshopPreviewsAsync(Math.Max(1, _workshopItems.Count)).ConfigureAwait(true);
                 await ScanBlankPreviewsAsync().ConfigureAwait(true);
 
@@ -274,7 +274,7 @@ namespace SkyMatch
                         && VisionCacheStore.IsValid(cached, item)) continue;
                     targets.Add(item);
                 }
-                SetStatus("高精度识图：待处理 " + targets.Count + " 张壁纸", false);
+                SetStatus("High-precision image recognition: pending" + targets.Count + "wallpapers", false);
                 await Task.Run(delegate
                 {
                     int done = 0;
@@ -300,12 +300,12 @@ namespace SkyMatch
                 RaiseWallpapersUpdated();
                 RaiseWorkshopUpdated();
                 RaiseStateChanged();
-                SetStatus("全部壁纸已按最高精度算法重算", false);
+                SetStatus("All wallpapers have been recalculated according to the highest accuracy algorithm", false);
             }
             catch (Exception ex)
             {
-                Log.Error("重新识图失败", ex);
-                SetStatus("识图失败：" + ex.Message, true);
+                Log.Error("Re-recognition failed", ex);
+                SetStatus("Failed to recognize image:" + ex.Message, true);
             }
             finally
             {
@@ -346,7 +346,7 @@ namespace SkyMatch
                     counts[item.MatchWeather] = counts[item.MatchWeather] - 1;
                     item.AutoPrimaryWeather = kind;
                     item.PrimaryWeather = kind;
-                    item.AutoReason = (item.AutoReason ?? "") + " · 按天气匹配分补足到 " + minimum + " 张";
+                    item.AutoReason = (item.AutoReason ?? "") + "· Top up according to weather matching points" + minimum + "open";
                     item.Reason = item.AutoReason;
                     counts[kind] = counts[kind] + 1;
                     missing--;
@@ -359,7 +359,7 @@ namespace SkyMatch
             _settings.WorkshopAutoRefresh = enabled;
             AppSettingsStore.Save(_settings);
             RaiseStateChanged();
-            SetStatus(enabled ? "工坊自动抓取已开启" : "工坊自动抓取已关闭", false);
+            SetStatus(enabled ? "Workshop automatic capture is turned on" : "Workshop automatic capture has been turned off", false);
             if (enabled && IsWorkshopRefreshDue)
             {
                 Task ignored = CheckWorkshopRefreshDueAsync();
@@ -372,7 +372,7 @@ namespace SkyMatch
             _settings.WorkshopRefreshDays = days;
             AppSettingsStore.Save(_settings);
             RaiseStateChanged();
-            SetStatus("工坊抓取间隔已设为 " + days + " 天", false);
+            SetStatus("The workshop crawl interval has been set to" + days + "sky", false);
             if (_settings.WorkshopAutoRefresh && IsWorkshopRefreshDue)
             {
                 Task ignored = CheckWorkshopRefreshDueAsync();
@@ -472,9 +472,9 @@ namespace SkyMatch
         public async Task InitializeAsync()
         {
             AppPaths.Ensure();
-            Log.Info("SkyMatch 启动，数据目录：" + AppPaths.DataDirectory);
+            Log.Info("SkyMatch starts, data directory:" + AppPaths.DataDirectory);
             _visionCache = VisionCacheStore.Load();
-            SetStatus("正在读取本地天气缓存…", false);
+            SetStatus("Reading local weather cache...", false);
             if (_settings.WorkshopTopEnabled)
             {
                 bool cached = LoadWorkshopCache();
@@ -511,7 +511,7 @@ namespace SkyMatch
                         _nextRefreshAt = DateTime.MinValue;
                     UpdateRecommendation();
                     RaiseWeatherUpdated();
-                    SetStatus("已载入上次的天气，每小时更新一次", false);
+                    SetStatus("The last weather has been loaded, updated every hour", false);
                 }
             }
 
@@ -537,7 +537,7 @@ namespace SkyMatch
                     }
                     catch (Exception ex)
                     {
-                        Log.Warn("旧位置补齐区县失败：" + ex.Message);
+                        Log.Warn("Failed to fill in the old location with districts and counties:" + ex.Message);
                     }
                 }
                 if (_weather == null)
@@ -550,7 +550,7 @@ namespace SkyMatch
                 }
                 else
                 {
-                    SetStatus("天气已载入 · 下次更新 " + _nextRefreshAt.ToString("HH:mm"), false);
+                    SetStatus("Weather loaded · Next update " + _nextRefreshAt.ToString("HH:mm"), false);
                 }
             }
 
@@ -562,7 +562,7 @@ namespace SkyMatch
             if (_scanning) return;
             _scanning = true;
             SetBusy(true);
-            SetStatus("正在扫描 Wallpaper Engine 创意工坊…", false);
+            SetStatus("Scanning Wallpaper Engine Workshop…", false);
             try
             {
                 WallpaperScanResult scan = await Task.Run(delegate
@@ -592,7 +592,7 @@ namespace SkyMatch
                 }
                 else
                 {
-                    SetStatus("发现 " + _wallpapers.Count + " 张可用壁纸，正在分析画面…", false);
+                    SetStatus("Discover" + _wallpapers.Count + "Available wallpapers, analyzing screen...", false);
                 }
 
                 if (String.IsNullOrEmpty(_settings.OriginalWallpaperPath) && !String.IsNullOrEmpty(_activePath))
@@ -621,7 +621,7 @@ namespace SkyMatch
                         }
                         index++;
                         if (index % 4 == 0 || index == total)
-                            progress.Report("正在读取壁纸 " + index + " / " + total + "…");
+                            progress.Report("Loading wallpaper" + index + " / " + total + "…");
                     }
                 }).ConfigureAwait(true);
 
@@ -643,8 +643,8 @@ namespace SkyMatch
 
                 if (String.IsNullOrEmpty(scan.Error))
                 {
-                    SetStatus("已识别 " + _wallpapers.Count + " 张壁纸 · 排除 " + AutoExcludedCount
-                        + " 张不适合项目", false);
+                    SetStatus("Recognized" + _wallpapers.Count + "wallpapers · excluded" + AutoExcludedCount
+                        + "Zhang is not suitable for the project", false);
                 }
                 if (pendingClassification.Count > 0)
                 {
@@ -653,8 +653,8 @@ namespace SkyMatch
             }
             catch (Exception ex)
             {
-                Log.Error("扫描壁纸失败", ex);
-                SetStatus("扫描壁纸失败：" + ex.Message, true);
+                Log.Error("Scanning wallpaper failed", ex);
+                SetStatus("Scanning wallpaper failed:" + ex.Message, true);
             }
             finally
             {
@@ -698,7 +698,7 @@ namespace SkyMatch
             }
             catch (Exception ex)
             {
-                Log.Warn("补充识别本地壁纸失败：" + ex.Message);
+                Log.Warn("Supplementary failure to identify local wallpaper:" + ex.Message);
             }
         }
 
@@ -722,14 +722,14 @@ namespace SkyMatch
                 _lastWallpaperChangeAt = DateTime.Now;
                 MarkActiveItem();
                 UpdateWorkshopActiveState();
-                SetStatus("已同步 Wallpaper Engine 当前壁纸", false);
+                SetStatus("Synced Wallpaper Engine current wallpaper", false);
                 EventHandler handler = ActiveWallpaperChanged;
                 if (handler != null) handler(this, EventArgs.Empty);
                 RaiseStateChanged();
             }
             catch (Exception ex)
             {
-                Log.Warn("同步 Wallpaper Engine 当前壁纸失败：" + ex.Message);
+                Log.Warn("Synchronizing Wallpaper Engine current wallpaper failed:" + ex.Message);
             }
             finally { _checkingActive = false; }
         }
@@ -745,9 +745,9 @@ namespace SkyMatch
                 return;
             }
             if (stamp == _workshopStamp) return;
-            SetStatus("检测到工坊壁纸变化，正在刷新壁纸库…", false);
+            SetStatus("Workshop wallpaper change detected, refreshing wallpaper library...", false);
             await ScanWallpapersAsync().ConfigureAwait(true);
-            if (!_scanning) SetStatus("已检测到新订阅的壁纸，壁纸库已更新", false);
+            if (!_scanning) SetStatus("Newly subscribed wallpapers have been detected and the wallpaper library has been updated", false);
         }
 
         private string BuildWorkshopStamp()
@@ -803,7 +803,7 @@ namespace SkyMatch
             bool applied = _audio.SetVolume(volume);
             AppSettingsStore.Save(_settings);
             RaiseStateChanged();
-            SetStatus(applied ? "壁纸音量已调整为 " + volume + "%" : "已保存音量（Wallpaper Engine 未运行）", false);
+            SetStatus(applied ? "Wallpaper volume has been adjusted to" + volume + "%" : "Volume saved (Wallpaper Engine is not running)", false);
         }
 
         public void SetWallpaperMuted(bool muted)
@@ -812,7 +812,7 @@ namespace SkyMatch
             bool applied = _audio.SetMute(muted);
             AppSettingsStore.Save(_settings);
             RaiseStateChanged();
-            SetStatus(applied ? (muted ? "壁纸已静音" : "壁纸声音已开启") : "已保存静音状态（Wallpaper Engine 未运行）", false);
+            SetStatus(applied ? (muted ? "Wallpaper muted" : "Wallpaper sound is turned on") : "Mute status saved (Wallpaper Engine is not running)", false);
         }
 
         public void SyncWallpaperAudio()
@@ -861,8 +861,8 @@ namespace SkyMatch
             RaiseStateChanged();
             if (!enabled)
             {
-                _workshopStatus = "订阅榜补充已关闭";
-                SetStatus("已关闭创意工坊订阅榜补充", false);
+                _workshopStatus = "Subscription list supplement has been closed";
+                SetStatus("Supplementary list of creative workshop subscription list has been closed", false);
                 RaiseWorkshopUpdated();
                 return;
             }
@@ -870,17 +870,17 @@ namespace SkyMatch
             bool loaded = LoadWorkshopCache();
             if (loaded && IsWorkshopCacheFresh())
             {
-                _workshopStatus = "使用 " + _workshopFetchedAt.ToString("HH:mm") + " 缓存的 "
-                    + _workshopItems.Count + " 个工坊候选";
+                _workshopStatus = "use" + _workshopFetchedAt.ToString("HH:mm") + "Cached"
+                    + _workshopItems.Count + "Candidates for workshops";
                 RaiseWorkshopUpdated();
                 RaiseStateChanged();
-                SetStatus("已启用创意工坊订阅榜补充", false);
+                SetStatus("Creative workshop subscription list supplement has been enabled", false);
                 return;
             }
             if (loaded)
             {
                 RaiseWorkshopUpdated();
-                SetStatus("已载入旧缓存，正在更新订阅榜…", false);
+                SetStatus("The old cache has been loaded and the subscription list is being updated...", false);
             }
             await RefreshWorkshopAsync(false).ConfigureAwait(true);
         }
@@ -889,25 +889,25 @@ namespace SkyMatch
         {
             if (!_settings.WorkshopTopEnabled)
             {
-                SetStatus("请先开启创意工坊订阅榜补充", true);
+                SetStatus("Please start the creative workshop subscription list supplement first", true);
                 return;
             }
             if (_workshopBusy)
             {
-                SetStatus("正在读取创意工坊，请稍候…", false);
+                SetStatus("Loading creative workshop, please wait...", false);
                 return;
             }
             _workshopBusy = true;
             _workshopError = "";
             int refreshSerial = ++_workshopBatchSerial;
-            _workshopStatus = "准备读取创意工坊订阅榜前 100 张…";
+            _workshopStatus = "Get ready to read the top 100 pictures on the creative workshop subscription list...";
             RaiseWorkshopUpdated();
             RaiseStateChanged();
             try
             {
                 if (!force && _workshopItems.Count == 0 && LoadWorkshopCache() && IsWorkshopCacheFresh())
                 {
-                    _workshopStatus = "使用缓存 · 共 " + _workshopItems.Count + " 个候选";
+                    _workshopStatus = "Use cache · Total" + _workshopItems.Count + "candidates";
                     RaiseWorkshopUpdated();
                     return;
                 }
@@ -920,7 +920,7 @@ namespace SkyMatch
 
                 _workshopItems = new List<WallpaperItem>();
                 _workshopPages = 0;
-                _workshopStatus = "正在抓取订阅榜候选并去重排序…";
+                _workshopStatus = "Fetching subscription list candidates and reordering...";
                 RaiseWorkshopUpdated();
                 RaiseStateChanged();
 
@@ -952,7 +952,7 @@ namespace SkyMatch
                 string[] tagErrors = new string[tags.Count];
                 int nextTag = -1;
                 int workers = Math.Min(3, tags.Count);
-                _workshopStatus = "正在并行抓取 " + tags.Count + " 个 Steam 标签…";
+                _workshopStatus = "Fetching in parallel" + tags.Count + "Steam tags…";
                 RaiseStateChanged();
                 Task[] tasks = new Task[workers];
                 for (int worker = 0; worker < workers; worker++)
@@ -974,7 +974,7 @@ namespace SkyMatch
                             catch (Exception tagError)
                             {
                                 tagErrors[index] = tag + "：" + tagError.Message;
-                                Log.Warn("读取工坊标签「" + tag + "」失败：" + tagError.Message);
+                                Log.Warn("Read workshop tag \"" + tag + "\"fail:" + tagError.Message);
                             }
                         }
                     });
@@ -994,11 +994,11 @@ namespace SkyMatch
                     if (!String.IsNullOrEmpty(tagResult.Error) && String.IsNullOrEmpty(firstError))
                         firstError = tagResult.Error;
                 }
-                _workshopStatus = "已抓取 " + tags.Count + " 个标签 · 去重后 " + combined.Count + " 张";
+                _workshopStatus = "Crawled" + tags.Count + "tags · After duplication removal" + combined.Count + "open";
                 RaiseStateChanged();
                 _workshopBatchSerial++;
                 if (combined.Count == 0)
-                    throw new InvalidOperationException("没有从创意工坊标签页解析到可用壁纸。");
+                    throw new InvalidOperationException("No available wallpapers were resolved from the Workshop tab.");
 
                 _workshopFetchedAt = DateTime.Now;
                 _workshopPages = pagesFetched;
@@ -1013,7 +1013,7 @@ namespace SkyMatch
                     return b.WorkshopVotes.CompareTo(a.WorkshopVotes);
                 });
                 for (int i = 0; i < _workshopItems.Count; i++) _workshopItems[i].WorkshopRank = i + 1;
-                _workshopStatus = "正在挑选适合当前天气与时段的候选…";
+                _workshopStatus = "Selecting candidates suitable for current weather and time of day...";
                 RaiseStateChanged();
                 LinkWorkshopToLocal();
                 SaveWorkshopCache();
@@ -1022,34 +1022,34 @@ namespace SkyMatch
                 {
                     _workshopError = firstError;
                     _workshopStatus = (_settings.PreferScenery
-                        ? "9 个未屏蔽标签各保留 100"
-                        : WorkshopContentTags.AllCount + " 个 Steam 标签各保留 50")
-                        + " · 去重后 " + _workshopItems.Count + " 张（部分数据未完成）";
+                        ? "9 unblocked tags reserved 100 each"
+                        : WorkshopContentTags.AllCount + "50 reserved for each Steam tag")
+                        + "· After removing duplicates" + _workshopItems.Count + "Zhang (some data is not completed)";
                 }
                 else
                 {
                     _workshopStatus = (_settings.PreferScenery
-                        ? "9 个未屏蔽标签各保留 100"
-                        : WorkshopContentTags.AllCount + " 个 Steam 标签各保留 50")
-                        + " · 去重后 " + _workshopItems.Count + " 张 · "
-                        + (_workshopItems.Count - CountInstalledWorkshop()) + " 个待订阅";
+                        ? "9 unblocked tags reserved 100 each"
+                        : WorkshopContentTags.AllCount + "50 reserved for each Steam tag")
+                        + "· After removing duplicates" + _workshopItems.Count + "open ·"
+                        + (_workshopItems.Count - CountInstalledWorkshop()) + "to be subscribed";
                 }
-                SetStatus("创意工坊标签候选已更新", false);
+                SetStatus("Workshop tag candidates updated", false);
                 RaiseWorkshopUpdated();
                 int firstScreenPreviews = Math.Min(40, _workshopItems.Count);
-                SetStatus("正在准备首屏工坊预览…", false);
+                SetStatus("Preparing for the first screen workshop preview...", false);
                 await EnsureWorkshopPreviewsAsync(firstScreenPreviews).ConfigureAwait(true);
-                SetStatus("首屏已就绪，其余预览在后台补齐…", false);
+                SetStatus("The first screen is ready, the rest of the preview is completed in the background...", false);
                 Task backgroundPreviews = EnsureWorkshopPreviewsAsync(_workshopItems.Count);
                 Task visionTask = ReclassifyVisionAsync();
             }
             catch (Exception ex)
             {
-                Log.Error("读取创意工坊失败", ex);
+                Log.Error("Failed to read workshop", ex);
                 _workshopError = ex.Message;
-                _workshopStatus = "读取失败";
+                _workshopStatus = "Read failed";
                 if (_workshopItems.Count == 0) LoadWorkshopCache();
-                SetStatus("创意工坊读取失败：" + ex.Message, true);
+                SetStatus("Creative workshop reading failed:" + ex.Message, true);
                 RaiseWorkshopUpdated();
             }
             finally
@@ -1082,7 +1082,7 @@ namespace SkyMatch
             foreach (WallpaperItem cachedItem in _workshopItems) ClassifyWorkshopItemQuick(cachedItem);
             ApplyVisionCache();
             LinkWorkshopToLocal();
-            _workshopStatus = "缓存 · " + catalog.Items.Count + " 个候选";
+            _workshopStatus = "cache ·" + catalog.Items.Count + "candidates";
             _workshopError = "";
             RaiseStateChanged();
             Task blankScan = ScanBlankPreviewsAsync();
@@ -1127,7 +1127,7 @@ namespace SkyMatch
             });
             for (int i = 0; i < _workshopItems.Count; i++) _workshopItems[i].WorkshopRank = i + 1;
             ApplyVisionCache();
-            _workshopStatus = "边抓取边显示 · 已获取 " + _workshopItems.Count + " 张 · 最终按订阅人数排序";
+            _workshopStatus = "Display while grabbing · Obtained" + _workshopItems.Count + "Zhang·Finally sorted by number of subscribers";
             RaiseWorkshopUpdated();
             RaiseStateChanged();
         }
@@ -1168,7 +1168,7 @@ namespace SkyMatch
             if (item.BlankPreview)
             {
                 item.IsSuitable = false;
-                item.ExcludeReason = "预览为单色块，已过滤";
+                item.ExcludeReason = "The preview is a single color block, filtered";
             }
             item.IsVideo = String.Equals(dto.Type, "video", StringComparison.OrdinalIgnoreCase);
             item.IsWeb = String.Equals(dto.Type, "web", StringComparison.OrdinalIgnoreCase);
@@ -1260,7 +1260,7 @@ namespace SkyMatch
         private async Task EnsureWorkshopPreviewsAsync(int max)
         {
             try { await DownloadWorkshopPreviewsAsync(max, null).ConfigureAwait(true); }
-            catch (Exception ex) { Log.Warn("补齐工坊预览失败：" + ex.Message); }
+            catch (Exception ex) { Log.Warn("Failed to complete workshop preview:" + ex.Message); }
         }
 
         private async Task DownloadWorkshopPreviewsAsync(int max, IProgress<string> progress)
@@ -1306,7 +1306,7 @@ namespace SkyMatch
                     return;
                 }
                 if (progress != null)
-                    progress.Report("正在补齐工坊预览图（" + targets.Count + " 张）…");
+                    progress.Report("The workshop preview is being completed (" + targets.Count + "open)…");
 
                 SemaphoreSlim gate = new SemaphoreSlim(6);
                 List<Task> tasks = new List<Task>();
@@ -1332,7 +1332,7 @@ namespace SkyMatch
                 gate.Dispose();
                 await ScanBlankPreviewsAsync().ConfigureAwait(true);
                 await RefineTopWorkshopAsync(160).ConfigureAwait(true);
-                if (progress != null) progress.Report("工坊预览图已补齐");
+                if (progress != null) progress.Report("The workshop preview has been completed");
             }
             finally
             {
@@ -1466,16 +1466,16 @@ namespace SkyMatch
             if (!item.IsInstalled || String.IsNullOrEmpty(item.LaunchPath))
             {
                 OpenWorkshopPage(item);
-                SetStatus("已打开 Steam 订阅页；下载完成后会自动加入壁纸库，无需重启。", false);
+                SetStatus("The Steam subscription page has been opened; after the download is completed, it will be automatically added to the wallpaper library without restarting.", false);
                 return false;
             }
             WallpaperItem local = FindWallpaper(item.Id);
             if (local == null)
             {
-                SetStatus("没有找到已安装的壁纸文件，请重新扫描。", true);
+                SetStatus("The installed wallpaper file was not found, please scan again.", true);
                 return false;
             }
-            return await ApplyWallpaperAsync(local, false, "从工坊精选应用").ConfigureAwait(true);
+            return await ApplyWallpaperAsync(local, false, "Selected apps from the workshop").ConfigureAwait(true);
         }
 
         public void OpenWorkshopPage(WallpaperItem item)
@@ -1487,7 +1487,7 @@ namespace SkyMatch
                 info.FileName = "steam://url/CommunityFilePage/" + item.Id;
                 info.UseShellExecute = true;
                 Process.Start(info);
-                SetStatus("已打开 Steam 创意工坊页面；订阅下载后会自动检测，无需重启。", false);
+                SetStatus("The Steam Workshop page has been opened; it will be automatically detected after the subscription is downloaded, and no restart is required.", false);
             }
             catch
             {
@@ -1500,7 +1500,7 @@ namespace SkyMatch
                 }
                 catch (Exception ex)
                 {
-                    SetStatus("无法打开创意工坊：" + ex.Message, true);
+                    SetStatus("Unable to open workshop:" + ex.Message, true);
                 }
             }
         }
@@ -1514,7 +1514,7 @@ namespace SkyMatch
             WallpaperItem best = ranked[0];
             WallpaperItem current = ActiveItem;
             if (current != null && current.Id == best.Id) return;
-            await ApplyWallpaperAsync(best, true, "启动时匹配当前天气与时段").ConfigureAwait(true);
+            await ApplyWallpaperAsync(best, true, "Match current weather and time period at startup").ConfigureAwait(true);
         }
 
         public async Task RefreshWeatherAsync(bool manual)
@@ -1525,7 +1525,7 @@ namespace SkyMatch
                 return;
             }
             _refreshingWeather = true;
-            SetStatus(manual ? "正在刷新室外天气…" : "正在更新天气…", false);
+            SetStatus(manual ? "Refreshing outdoor weather..." : "Updating weather...", false);
             RaiseStateChanged();
             try
             {
@@ -1558,9 +1558,9 @@ namespace SkyMatch
                 if (autoSwitchNeeded)
                 {
                     string label = changed && timeChanged
-                        ? "天气与时段同时变化" : (changed ? "天气转为「" + WeatherKindInfo.Name(data.Current.Kind) + "」"
-                        : "时段进入「" + TimeSlotInfo.Name(CurrentTimeSlot) + "」");
-                    SetStatus(label + "，正在匹配壁纸…", false);
+                        ? "Weather and time of day changed" : (changed ? "Weather changed to \"" + WeatherKindInfo.Name(data.Current.Kind) + "\""
+                        : "Time of day entered \"" + TimeSlotInfo.Name(CurrentTimeSlot) + "\"");
+                    SetStatus(label + ", matching wallpaper...", false);
                     bool handled = await AutoFollowAsync(data.Current.Kind).ConfigureAwait(true);
                     if (!handled)
                     {
@@ -1572,16 +1572,16 @@ namespace SkyMatch
                 else if (changed || timeChanged)
                 {
                     SetStatus(changed
-                        ? "天气已更新为「" + WeatherKindInfo.Name(data.Current.Kind) + "」"
-                        : "时段进入「" + TimeSlotInfo.Name(CurrentTimeSlot) + "」", false);
+                        ? "The weather has been updated to \"" + WeatherKindInfo.Name(data.Current.Kind) + "」"
+                        : "Time period enters \"" + TimeSlotInfo.Name(CurrentTimeSlot) + "」", false);
                 }
                 else if (firstWeather || (_settings.UseTimeOfDay && firstTime))
                 {
-                    SetStatus("天气与时段的匹配已就绪", false);
+                    SetStatus("Weather and time period matching is ready", false);
                 }
                 else
                 {
-                    SetStatus("天气已刷新 · 当前 " + FormatTemperature(data.Current.Temperature)
+                    SetStatus("Weather updated · Current " + FormatTemperature(data.Current.Temperature)
                         + " · " + data.Current.Description, false);
                 }
 
@@ -1592,18 +1592,18 @@ namespace SkyMatch
                         _settings.HasAppliedOnce = true;
                         _settings.LastTimeSlot = CurrentTimeSlot.ToString();
                         AppSettingsStore.Save(_settings);
-                        SetStatus("当前壁纸已经匹配天气与时段 · 自动跟随已就绪", false);
+                        SetStatus("The current wallpaper has matched the weather and time period · Automatic follow is ready", false);
                     }
                     else
                     {
-                        SetStatus("自动跟随已开启，正在应用此刻的匹配壁纸…", false);
-                        await ApplyWallpaperAsync(_recommended, true, "匹配当前天气与时段").ConfigureAwait(true);
+                        SetStatus("Auto-follow is on, applying the matching wallpaper at the moment...", false);
+                        await ApplyWallpaperAsync(_recommended, true, "Match current weather and time period").ConfigureAwait(true);
                     }
                 }
             }
             catch (Exception ex)
             {
-                Log.Error("获取天气失败", ex);
+                Log.Error("Failed to get weather", ex);
                 if (_weather == null)
                 {
                     WeatherData cached = WeatherCacheStore.Load();
@@ -1615,7 +1615,7 @@ namespace SkyMatch
                         RaiseWeatherUpdated();
                     }
                 }
-                SetStatus("天气更新失败：" + FriendlyError(ex), true);
+                SetStatus("Weather update failed:" + FriendlyError(ex), true);
             }
             finally
             {
@@ -1630,22 +1630,22 @@ namespace SkyMatch
         {
             if (_settings.LocationLocked && _settings.HasLocation)
             {
-                SetStatus("定位已锁定，IP 变化不会修改当前位置。", false);
+                SetStatus("The location is locked and IP changes will not modify the current location.", false);
                 return;
             }
             SetBusy(true);
-            SetStatus("正在根据 IP 定位…", false);
+            SetStatus("Targeting by IP...", false);
             try
             {
                 LocationInfo loc = await _weatherService.LocateByIpAsync().ConfigureAwait(true);
                 ApplyLocation(loc);
-                SetStatus("定位到 " + loc.DisplayName + (loc.IsApproximate ? "（IP 定位，可在设置中修正）" : ""), false);
+                SetStatus("locate" + loc.DisplayName + (loc.IsApproximate ? "(IP positioning can be corrected in settings)" : ""), false);
                 await RefreshWeatherAsync(false).ConfigureAwait(true);
             }
             catch (Exception ex)
             {
-                Log.Error("IP 定位失败", ex);
-                SetStatus("IP 定位失败：" + ex.Message, true);
+                Log.Error("IP location failed", ex);
+                SetStatus("IP location failed:" + ex.Message, true);
             }
             finally
             {
@@ -1659,7 +1659,7 @@ namespace SkyMatch
             await _weatherService.EnrichLocationAsync(location).ConfigureAwait(true);
             ApplyLocation(location);
             RememberLocation(location);
-            SetStatus("位置已切换为 " + location.DisplayName, false);
+            SetStatus("Location switched to" + location.DisplayName, false);
             await RefreshWeatherAsync(true).ConfigureAwait(true);
         }
 
@@ -1678,14 +1678,14 @@ namespace SkyMatch
         {
             if (locked && !_settings.HasLocation)
             {
-                SetStatus("请先搜索并选择城市，再锁定定位。", true);
+                SetStatus("Please search and select the city first, and then lock the location.", true);
                 RaiseStateChanged();
                 return;
             }
             if (_settings.LocationLocked == locked) return;
             _settings.LocationLocked = locked;
             AppSettingsStore.Save(_settings);
-            SetStatus(locked ? "定位已锁定，IP 变化不会修改当前位置。" : "定位已解锁，允许 IP 定位。", false);
+            SetStatus(locked ? "The location is locked and IP changes will not modify the current location." : "Targeting is unlocked, allowing IP targeting.", false);
             RaiseStateChanged();
         }
 
@@ -1749,7 +1749,7 @@ namespace SkyMatch
             loc.Longitude = _settings.Longitude;
             loc.Timezone = _settings.Timezone;
             loc.IsApproximate = _settings.LocationApproximate;
-            loc.Source = _settings.LocationApproximate ? "IP" : "手动";
+            loc.Source = _settings.LocationApproximate ? "IP" : "Manual";
             return loc;
         }
 
@@ -1758,37 +1758,37 @@ namespace SkyMatch
             if (FullscreenDetector.IsFullscreenApp())
             {
                 _autoSwitchDeferred = true;
-                SetStatus("检测到全屏程序，已暂停自动切换壁纸", false);
+                SetStatus("Full screen program detected, automatic wallpaper switching paused", false);
                 return true;
             }
             TimeSlot slot = CurrentTimeSlot;
             List<WallpaperItem> ranked = GetRanked(kind);
             if (ranked.Count == 0)
             {
-                SetStatus("没有可用的壁纸，无法自动匹配。", true);
+                SetStatus("There are no wallpapers available and cannot be matched automatically.", true);
                 return true;
             }
             WallpaperItem best = ranked[0];
             WallpaperItem current = ActiveItem;
-            string context = "天气「" + WeatherKindInfo.Name(kind) + "」";
+            string context = "weather\"" + WeatherKindInfo.Name(kind) + "」";
             if (_settings.UseTimeOfDay)
-                context += " · 时段「" + TimeSlotInfo.Name(slot) + "」";
+                context += "·Time period" + TimeSlotInfo.Name(slot) + "」";
             if (CurrentWallpaperMatches(kind, slot))
             {
-                SetStatus(context + "，当前壁纸已经匹配，无需切换。", false);
+                SetStatus(context + ", the current wallpaper has been matched, no need to switch.", false);
                 return true;
             }
             if (current != null && current.Id == best.Id)
             {
-                SetStatus(context + "，当前壁纸《" + current.Title + "》已经匹配。", false);
+                SetStatus(context + ", current wallpaper \"" + current.Title + "\" already matches.", false);
                 return true;
             }
             if (current != null && CombinedScore(current, kind, slot) >= CombinedScore(best, kind, slot) - 0.001)
             {
-                SetStatus(context + "，当前壁纸仍然最匹配。", false);
+                SetStatus(context + ", the current wallpaper still matches best.", false);
                 return true;
             }
-            return await ApplyWallpaperAsync(best, true, "匹配" + context).ConfigureAwait(true);
+            return await ApplyWallpaperAsync(best, true, "match" + context).ConfigureAwait(true);
         }
 
         private bool CurrentWallpaperMatches(WeatherKind kind, TimeSlot slot)
@@ -1813,24 +1813,24 @@ namespace SkyMatch
         {
             if (_weather == null)
             {
-                SetStatus("天气数据还没准备好，请稍后再试。", true);
+                SetStatus("The weather data is not ready yet, please try again later.", true);
                 return false;
             }
             WallpaperItem best = _recommended;
             if (best == null)
             {
-                SetStatus("没有找到可用的壁纸。", true);
+                SetStatus("No available wallpapers found.", true);
                 return false;
             }
             if (ActiveItem != null && ActiveItem.Id == best.Id)
             {
                 _settings.HasAppliedOnce = true;
                 AppSettingsStore.Save(_settings);
-                SetStatus("当前壁纸《" + best.Title + "》已经是最佳匹配。", false);
+                SetStatus("Current wallpaper \"" + best.Title + "\" is already the best match.", false);
                 RaiseStateChanged();
                 return true;
             }
-            return await ApplyWallpaperAsync(best, false, "手动匹配当前天气").ConfigureAwait(true);
+            return await ApplyWallpaperAsync(best, false, "Manually match current weather").ConfigureAwait(true);
         }
 
         public async Task<bool> ApplyWallpaperAsync(WallpaperItem item, bool automatic, string reason)
@@ -1839,22 +1839,22 @@ namespace SkyMatch
             if (automatic && FullscreenDetector.IsFullscreenApp())
             {
                 _autoSwitchDeferred = true;
-                SetStatus("检测到全屏程序，已暂停自动切换壁纸", false);
+                SetStatus("Full screen program detected, automatic wallpaper switching paused", false);
                 return false;
             }
             if (_engine == null || !_engine.IsAvailable)
             {
-                SetStatus("Wallpaper Engine 不可用，无法切换壁纸。", true);
+                SetStatus("Wallpaper Engine is unavailable and wallpaper cannot be switched.", true);
                 return false;
             }
             if (_applying)
             {
-                SetStatus("正在切换壁纸，请稍候。", false);
+                SetStatus("Switching wallpaper, please wait.", false);
                 return false;
             }
             _applying = true;
             SetBusy(true);
-            SetStatus(automatic ? "正在按天气切换壁纸…" : "正在切换壁纸…", false);
+            SetStatus(automatic ? "Switching wallpapers by weather..." : "Switching wallpaper…", false);
             try
             {
                 WallpaperApplyResult result = await _engine.ApplyAsync(item).ConfigureAwait(true);
@@ -1882,14 +1882,14 @@ namespace SkyMatch
                 WallpaperAppliedEventArgs args = new WallpaperAppliedEventArgs(item, automatic, reason);
                 EventHandler<WallpaperAppliedEventArgs> handler = WallpaperApplied;
                 if (handler != null) handler(this, args);
-                string prefix = automatic ? "已自动切换" : "已切换";
-                SetStatus(prefix + "到《" + item.Title + "》· " + (result.Verified ? "桌面已更新" : "正在加载"), false);
+                string prefix = automatic ? "Automatically switched" : "Switched";
+                SetStatus(prefix + "arrive\"" + item.Title + "》· " + (result.Verified ? "Desktop updated" : "Loading"), false);
                 return true;
             }
             catch (Exception ex)
             {
-                Log.Error("切换壁纸失败", ex);
-                SetStatus("切换壁纸失败：" + ex.Message, true);
+                Log.Error("Failed to switch wallpaper", ex);
+                SetStatus("Failed to switch wallpaper:" + ex.Message, true);
                 return false;
             }
             finally
@@ -1904,16 +1904,16 @@ namespace SkyMatch
             if (String.IsNullOrEmpty(_settings.OriginalWallpaperPath)
                 || !File.Exists(_settings.OriginalWallpaperPath))
             {
-                SetStatus("没有保存到原始壁纸，无法恢复。", true);
+                SetStatus("The original wallpaper is not saved and cannot be restored.", true);
                 return false;
             }
             if (_engine == null || !_engine.IsAvailable)
             {
-                SetStatus("Wallpaper Engine 不可用。", true);
+                SetStatus("Wallpaper Engine is not available.", true);
                 return false;
             }
             SetBusy(true);
-            SetStatus("正在恢复最初的壁纸…", false);
+            SetStatus("Restoring original wallpaper…", false);
             try
             {
                 WallpaperApplyResult result = await _engine.ApplyPathAsync(_settings.OriginalWallpaperPath).ConfigureAwait(true);
@@ -1930,13 +1930,13 @@ namespace SkyMatch
                 AppSettingsStore.Save(_settings);
                 RaiseStateChanged();
                 RaiseWallpapersUpdated();
-                SetStatus("已恢复最初的壁纸。", false);
+                SetStatus("Original wallpaper restored.", false);
                 return true;
             }
             catch (Exception ex)
             {
-                Log.Error("恢复原始壁纸失败", ex);
-                SetStatus("恢复原始壁纸失败：" + ex.Message, true);
+                Log.Error("Failed to restore original wallpaper", ex);
+                SetStatus("Failed to restore original wallpaper:" + ex.Message, true);
                 return false;
             }
             finally
@@ -1958,8 +1958,8 @@ namespace SkyMatch
             RaiseWallpapersUpdated();
             RaiseStateChanged();
             SetStatus("《" + item.Title + "》" + (kind.HasValue
-                ? "已锁定为「" + WeatherKindInfo.Name(kind.Value) + "」"
-                : "已恢复自动识别"), false);
+                ? "Locked as \"" + WeatherKindInfo.Name(kind.Value) + "」"
+                : "Automatic recognition has been restored"), false);
         }
 
         public void SetHidden(WallpaperItem item, bool hidden)
@@ -1978,7 +1978,7 @@ namespace SkyMatch
             UpdateRecommendation();
             RaiseWallpapersUpdated();
             RaiseStateChanged();
-            SetStatus(hidden ? "已从匹配中排除《" + item.Title + "》" : "已恢复《" + item.Title + "》的匹配", false);
+            SetStatus(hidden ? "Excluded from matching" + item.Title + "》" : "Has been restored" + item.Title + "》match", false);
         }
 
         public void ResetManualMappings()
@@ -1990,7 +1990,7 @@ namespace SkyMatch
             UpdateRecommendation();
             RaiseWallpapersUpdated();
             RaiseStateChanged();
-            SetStatus("已重置全部手动天气校准。", false);
+            SetStatus("All manual weather calibrations have been reset.", false);
         }
 
         public void ResetHiddenWallpapers()
@@ -2001,7 +2001,7 @@ namespace SkyMatch
             UpdateRecommendation();
             RaiseWallpapersUpdated();
             RaiseStateChanged();
-            SetStatus("已恢复被排除的壁纸。", false);
+            SetStatus("Excluded wallpapers have been restored.", false);
         }
 
         public void SetAutoFollow(bool enabled)
@@ -2009,7 +2009,7 @@ namespace SkyMatch
             _settings.AutoFollow = enabled;
             AppSettingsStore.Save(_settings);
             RaiseStateChanged();
-            SetStatus(enabled ? "自动跟随已开启 · 天气与时段变化时会切换壁纸" : "自动跟随已暂停", false);
+            SetStatus(enabled ? "Auto-follow is on · Wallpapers will be switched when the weather and time of day change" : "Auto-following is paused", false);
         }
 
         public void SetUseTimeOfDay(bool enabled)
@@ -2020,7 +2020,7 @@ namespace SkyMatch
             UpdateRecommendation();
             RaiseWallpapersUpdated();
             RaiseStateChanged();
-            SetStatus(enabled ? "已结合当前时段选择壁纸" : "已仅按天气选择壁纸", false);
+            SetStatus(enabled ? "The wallpaper has been selected based on the current time period" : "Wallpapers selected by weather only", false);
         }
 
         public async Task CheckTimeChangeAsync()
@@ -2035,7 +2035,7 @@ namespace SkyMatch
             RaiseWallpapersUpdated();
             if (_settings.AutoFollow && _settings.HasAppliedOnce)
             {
-                SetStatus("时段进入「" + TimeSlotInfo.Name(CurrentTimeSlot) + "」，正在匹配壁纸…", false);
+                SetStatus("Time period enters \"" + TimeSlotInfo.Name(CurrentTimeSlot) + "\", matching wallpaper...", false);
                 bool handled = await AutoFollowAsync(_weather.Current.Kind).ConfigureAwait(true);
                 if (!handled)
                 {
@@ -2045,7 +2045,7 @@ namespace SkyMatch
             }
             else
             {
-                SetStatus("时段进入「" + TimeSlotInfo.Name(CurrentTimeSlot) + "」· 推荐已更新", false);
+                SetStatus("Time period enters \"" + TimeSlotInfo.Name(CurrentTimeSlot) + "》· Recommendations have been updated", false);
                 RaiseStateChanged();
             }
         }
@@ -2064,8 +2064,8 @@ namespace SkyMatch
             _lastWallpaperChangeAt = DateTime.Now;
             AppSettingsStore.Save(_settings);
             SetStatus(enabled
-                ? "自动更换壁纸已开启，请填写分钟数"
-                : "自动更换壁纸已关闭", false);
+                ? "Automatically change wallpaper is turned on, please fill in the number of minutes"
+                : "Automatically change wallpaper is turned off", false);
             RaiseStateChanged();
         }
 
@@ -2077,8 +2077,8 @@ namespace SkyMatch
             _lastWallpaperChangeAt = DateTime.Now;
             AppSettingsStore.Save(_settings);
             if (_settings.RecommendationRotateEnabled)
-                SetStatus(minutes <= 0 ? "请填写自动更换的分钟数"
-                    : "每隔 " + minutes + " 分钟自动更换壁纸", false);
+                SetStatus(minutes <= 0 ? "Please fill in the number of minutes for automatic replacement"
+                    : "every" + minutes + "Automatically change wallpaper in minutes", false);
             RaiseStateChanged();
         }
 
@@ -2109,7 +2109,7 @@ namespace SkyMatch
                 : ranked[0];
             if (next == null) return;
             if (ranked.Count == 1 && next.IsActive) return;
-            await ApplyWallpaperAsync(next, true, "此刻推荐定时更换").ConfigureAwait(true);
+            await ApplyWallpaperAsync(next, true, "It is recommended to replace it regularly at this time").ConfigureAwait(true);
         }
 
         public void SetStartWithWindows(bool enabled)
@@ -2274,7 +2274,7 @@ namespace SkyMatch
                     {
                         item = new WallpaperItem();
                         item.Id = id;
-                        item.Title = "已屏蔽的壁纸 #" + id;
+                        item.Title = "Blocked wallpaper #" + id;
                     }
                     result.Add(item);
                 }
@@ -2291,7 +2291,7 @@ namespace SkyMatch
             _characterCache.Remove(item.Id);
             RaiseWorkshopUpdated();
             RaiseStateChanged();
-            SetStatus("已屏蔽《" + item.Title + "》，可在设置中取消屏蔽", false);
+            SetStatus("Blocked" + item.Title + "》, you can unblock it in the settings", false);
         }
 
         public void UnblockWallpaper(string id)
@@ -2301,7 +2301,7 @@ namespace SkyMatch
             AppSettingsStore.Save(_settings);
             RaiseWorkshopUpdated();
             RaiseStateChanged();
-            SetStatus("已取消屏蔽该壁纸", false);
+            SetStatus("This wallpaper has been unblocked", false);
         }
 
         public bool IsCharacterItem(WallpaperItem item)
@@ -2382,7 +2382,7 @@ namespace SkyMatch
             {
                 Task ignored = RefreshWorkshopAsync(true);
             }
-            SetStatus("内容分级筛选：" + AgeRatingInfo.DescribeMask(mask), false);
+            SetStatus("Content rating filter:" + AgeRatingInfo.DescribeMask(mask), false);
         }
 
         public int AutoExcludedCount
@@ -2738,16 +2738,16 @@ namespace SkyMatch
 
         private static string FriendlyError(Exception ex)
         {
-            if (ex == null) return "未知错误";
+            if (ex == null) return "unknown error";
             string message = ex.Message;
             if (message.IndexOf("timed out", StringComparison.OrdinalIgnoreCase) >= 0
-                || message.IndexOf("超时", StringComparison.OrdinalIgnoreCase) >= 0)
-                return "网络超时，请检查网络连接";
+                || message.IndexOf("time out", StringComparison.OrdinalIgnoreCase) >= 0)
+                return "Network timeout, please check network connection";
             if (message.IndexOf("remote name", StringComparison.OrdinalIgnoreCase) >= 0)
-                return "无法连接天气服务";
-            if (message.IndexOf("块的长度", StringComparison.OrdinalIgnoreCase) >= 0
+                return "Unable to connect to weather service";
+            if (message.IndexOf("block length", StringComparison.OrdinalIgnoreCase) >= 0
                 || message.IndexOf("block length", StringComparison.OrdinalIgnoreCase) >= 0)
-                return "天气服务返回了不兼容的压缩数据，请稍后重试";
+                return "The weather service returned incompatible compressed data, please try again later.";
             return message;
         }
     }

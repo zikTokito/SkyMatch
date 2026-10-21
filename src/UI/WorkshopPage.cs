@@ -25,7 +25,7 @@ namespace SkyMatch
             _controller = controller;
             _item = item;
             _featured = featured;
-            FeaturedLabel = "最佳匹配";
+            FeaturedLabel = "best match";
             SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer
                 | ControlStyles.ResizeRedraw | ControlStyles.UserPaint | ControlStyles.SupportsTransparentBackColor, true);
             BackColor = Theme.Bg;
@@ -33,7 +33,7 @@ namespace SkyMatch
             Cursor = Cursors.Default;
 
             _open = new ActionButton();
-            _open.Text = item.IsInstalled ? "工坊页" : "订阅";
+            _open.Text = item.IsInstalled ? "Workshop page" : "Subscribe";
             _open.Pill = true;
             _open.Size = new Size(78, 32);
             _open.Font = Theme.FontSmall;
@@ -48,7 +48,7 @@ namespace SkyMatch
             Controls.Add(_open);
 
             _apply = new ActionButton();
-            _apply.Text = "应用";
+            _apply.Text = "Apply";
             _apply.Pill = true;
             _apply.Size = new Size(64, 32);
             _apply.Font = Theme.FontSmall;
@@ -153,8 +153,8 @@ namespace SkyMatch
                 rightLimit - x);
             Theme.DrawText(e.Graphics, title, _featured ? Theme.FontMedium : Theme.FontBold, Theme.Text, x, titleY);
             string meta = _item.TypeLabel
-                + (_item.WorkshopSubscriptions > 0 ? "  ·  " + _item.WorkshopSubscriptions + " 订阅" : "")
-                + (_item.IsInstalled ? "  ·  已安装" : "  ·  待订阅");
+                + (_item.WorkshopSubscriptions > 0 ? "  ·  " + _item.WorkshopSubscriptions + " subscribers" : "")
+                + (_item.IsInstalled ? "  ·  Installed" : "  ·  Not subscribed");
             Theme.DrawText(e.Graphics, meta, Theme.FontTiny,
                 _item.IsInstalled ? Theme.Green : Theme.Muted, x, titleY + (_featured ? 27 : 24));
 
@@ -171,7 +171,7 @@ namespace SkyMatch
             DrawPill(e.Graphics, x, badgeY, WeatherKindInfo.Name(kind), accent);
             DrawPill(e.Graphics, x + 76, badgeY, TimeSlotInfo.Name(_item.PrimaryTime),
                 Theme.TimeColor(_item.PrimaryTime));
-            string confidence = _item.IsManual ? "手动天气" : "天气 " + Math.Round(_item.Confidence) + "%";
+            string confidence = _item.IsManual ? "Manual weather" : "weather" + Math.Round(_item.Confidence) + "%";
             Theme.DrawText(e.Graphics, confidence, Theme.FontTiny, Theme.Dim, x + 158, badgeY + 3);
         }
 
@@ -226,7 +226,7 @@ namespace SkyMatch
             _gridView = controller.Settings.WorkshopGridView;
 
             _refresh = new ActionButton();
-            _refresh.Text = "重新抓取";
+            _refresh.Text = "Refresh";
             _refresh.Icon = ActionButton.IconKind.Refresh;
             _refresh.Pill = true;
             _refresh.Size = new Size(104, 34);
@@ -239,7 +239,7 @@ namespace SkyMatch
             };
 
             _rescan = new ActionButton();
-            _rescan.Text = "扫描已安装";
+            _rescan.Text = "Scan";
             _rescan.Icon = ActionButton.IconKind.Refresh;
             _rescan.Pill = true;
             _rescan.Size = new Size(112, 34);
@@ -271,7 +271,7 @@ namespace SkyMatch
             _grid.Resize += delegate { LayoutCards(); };
 
             _viewButton = new ActionButton();
-            _viewButton.Text = _gridView ? "列表视图" : "网格视图";
+            _viewButton.Text = _gridView ? "List" : "Grid";
             _viewButton.Icon = ActionButton.IconKind.Grid;
             _viewButton.Pill = true;
             _viewButton.Size = new Size(92, 34);
@@ -286,7 +286,7 @@ namespace SkyMatch
             };
 
             _sceneryButton = new ActionButton();
-            _sceneryButton.Text = _controller.Settings.PreferScenery ? "风景优先：开" : "风景优先：关";
+            _sceneryButton.Text = _controller.Settings.PreferScenery ? "Scenery priority: On" : "Landscape priority: Off";
             _sceneryButton.Icon = ActionButton.IconKind.Grid;
             _sceneryButton.Pill = true;
             _sceneryButton.Size = new Size(104, 34);
@@ -313,7 +313,7 @@ namespace SkyMatch
             _typeChips = new ChipStrip();
             _typeChips.Height = 28;
             _typeChips.ShowCounts = false;
-            _typeChips.Items.Add(new ChipStrip.Chip("全部类型", null));
+            _typeChips.Items.Add(new ChipStrip.Chip("All types", null));
             foreach (WeatherKind kind in WeatherKindInfo.All)
                 _typeChips.Items.Add(new ChipStrip.Chip(WeatherKindInfo.Name(kind), kind));
             _typeChips.SetSelectedSilent(0);
@@ -326,14 +326,14 @@ namespace SkyMatch
             };
 
             _prevPage = new ActionButton();
-            _prevPage.Text = "上一页";
+            _prevPage.Text = "Previous";
             _prevPage.Pill = true;
             _prevPage.Size = new Size(62, 28);
             _prevPage.AccentColor = Theme.Muted;
             _prevPage.Click += delegate { ChangePage(-1); };
 
             _nextPage = new ActionButton();
-            _nextPage.Text = "下一页";
+            _nextPage.Text = "Next";
             _nextPage.Pill = true;
             _nextPage.Size = new Size(62, 28);
             _nextPage.AccentColor = Theme.Yellow;
@@ -429,13 +429,13 @@ namespace SkyMatch
 
         private static readonly string[] QuickCharacterTerms =
         {
-            "凌晨", "小钇", "苏雨果", "苏莓果", "顾冷冷", "老八", "清宵", "若不是你", "furry", "barrie",
+            "early morning", "small yttrium", "Su Yuguo", "su berry", "Gu Lengleng", "Laoba", "Qingxiao", "if not for you", "furry", "barrie",
             "acostaeliann", "berserk", "wallhall",
-            "脓疱", "子非鱼", "你可以永远", "림버스", "limbus", "acheron", "林初雪",
-            "云羽", "蓝皮书", "shadow fiend", "杨幂", "小丑", "silent conurbano",
-            "lucía", "lucia", "shrek", "loud valorant", "魂类画师", "dohrn",
-            "deepseek", "nikke", "valorant", "gta", "frieren", "芙莉莲",
-            "清宵", "小钇", "星塔旅人", "心月狐", "爱弥斯", "绯雪"
+            "Pustules", "Zifeiyu", "you can forever", "림버스", "limbus", "acheron", "Lin Chuxue",
+            "Yun Yu", "blue book", "shadow fiend", "Yang Mi", "clown", "silent conurbano",
+            "lucía", "lucia", "shrek", "loud valorant", "Soul Painter", "dohrn",
+            "deepseek", "nikke", "valorant", "gta", "frieren", "Florian",
+            "Qingxiao", "small yttrium", "Star Tower Traveler", "Heart Moon Fox", "amis", "Feixue"
         };
 
         private bool IsBlockedSceneItem(WallpaperItem item)
@@ -474,7 +474,7 @@ namespace SkyMatch
             List<WallpaperItem> ranked = GetVisibleWorkshopRanked();
             if (ranked.Count == 0) return;
             _empty.Visible = false;
-            string featuredLabel = "订阅榜最高";
+            string featuredLabel = "Most subscribed";
             HashSet<string> existing = new HashSet<string>(StringComparer.Ordinal);
             int scroll = 0;
             if (_gridView)
@@ -548,7 +548,7 @@ namespace SkyMatch
             {
                 if (IsDisposed) return;
                 Rectangle anchor = card.RectangleToScreen(card.BlockBounds);
-                _blockTip.ShowBelow("屏蔽后不会在工坊出现，可在设置中取消屏蔽", this, anchor);
+                _blockTip.ShowBelow("After blocking, it will not appear in the workshop. You can unblock it in the settings.", this, anchor);
             };
             card.BlockUnhovered += delegate { if (!IsDisposed) _blockTip.HideTip(); };
             return card;
@@ -622,9 +622,9 @@ namespace SkyMatch
                 _hoverPanel.Visible = false;
                 _viewButton.Visible = enabled;
                 _sceneryButton.Visible = enabled;
-                _viewButton.Text = _gridView ? "列表视图" : "网格视图";
-                _sceneryButton.Text = _controller.Settings.PreferScenery ? "风景优先：开" : "风景优先：关";
-                string featuredLabel = "订阅榜最高";
+                _viewButton.Text = _gridView ? "List" : "Grid";
+                _sceneryButton.Text = _controller.Settings.PreferScenery ? "Scenery: On" : "Scenery: Off";
+                string featuredLabel = "Most subscribed";
 
                 List<WallpaperItem> ranked = GetVisibleWorkshopRanked();
                 if (ranked.Count == 0)
@@ -633,21 +633,21 @@ namespace SkyMatch
                     if (_controller.WorkshopBusy)
                     {
                         _empty.Text = _controller.Settings.PreferScenery
-                            ? "正在抓取 9 个未屏蔽标签，每个标签保留前 100 张…\n\n这可能需要一些时间，请保持网络畅通。"
-                            : "正在抓取 " + WorkshopContentTags.AllCount + " 个 Steam 标签，每个标签保留前 50 张…\n\n这可能需要一些时间，请保持网络畅通。";
+                            ? "Fetching 9 allowed tags, keeping the top 100 of each...\n\nThis may take a while. Keep the network available."
+                            : "Fetching " + WorkshopContentTags.AllCount + " Steam tags, keeping the top 50 of each...\n\nThis may take a while. Keep the network available.";
                         _status.ForeColor = Theme.Muted;
                     }
                     else if (!String.IsNullOrEmpty(_controller.WorkshopError))
                     {
-                        _empty.Text = "读取创意工坊失败。\n\n" + _controller.WorkshopError
-                            + "\n\n如果使用加速器，请开启 Steam 社区加速后再试。";
+                        _empty.Text = "Failed to load the Workshop.\n\n" + _controller.WorkshopError
+                            + "\n\nIf you use a Steam community accelerator, enable it and try again.";
                         _status.ForeColor = Theme.Red;
                     }
                     else
                     {
                         _empty.Text = _controller.Settings.PreferScenery
-                            ? "还没有工坊候选。\n\n点击“重新抓取”为 9 个未屏蔽标签各保留前 100 张。"
-                            : "还没有工坊候选。\n\n点击“重新抓取”为 " + WorkshopContentTags.AllCount + " 个 Steam 标签各保留前 50 张。";
+                            ? "No Workshop candidates yet.\n\nClick Refresh to keep the top 100 of 9 allowed tags."
+                            : "No Workshop candidates yet.\n\nClick Refresh to keep the top 50 of " + WorkshopContentTags.AllCount + " Steam tags.";
                         _status.ForeColor = Theme.Muted;
                     }
                     _empty.BringToFront();
@@ -716,30 +716,30 @@ namespace SkyMatch
             if (!enabled) return;
             string status = _controller.WorkshopStatus;
             if (_controller.WorkshopError != null && _controller.WorkshopError.Length > 0)
-                status = "错误：" + _controller.WorkshopError;
+                status = "Error: " + _controller.WorkshopError;
             int installed = 0;
             foreach (WallpaperItem item in _controller.WorkshopItems) if (item.IsInstalled) installed++;
             int displayCount = _controller.WorkshopDisplayCount;
             string summary = _controller.WorkshopItems.Count > 0
-                ? "  ·  已安装 " + installed + " / " + displayCount
+                ? "  ·  Installed " + installed + " / " + displayCount
                     + (_controller.WorkshopExcludedCount > 0
-                        ? "  ·  过滤 " + _controller.WorkshopExcludedCount + " 个不适合项目" : "")
+                        ? "  ·  Filtered " + _controller.WorkshopExcludedCount + " unsuitable items" : "")
                     + (_controller.Settings.PreferScenery && _controller.WorkshopSceneryFilteredCount > 0
-                        ? "  ·  风景优先过滤 " + _controller.WorkshopSceneryFilteredCount + " 个" : "")
+                        ? "  ·  Scenery filtered " + _controller.WorkshopSceneryFilteredCount : "")
                     + (_controller.WorkshopAgeFilteredCount > 0
-                        ? "  ·  分级隐藏 " + _controller.WorkshopAgeFilteredCount + " 个" : "")
-                    + "  ·  第 " + (_page + 1) + "/" + _pageCount + " 页"
+                        ? "  ·  Rating hidden " + _controller.WorkshopAgeFilteredCount : "")
+                    + "  ·  Page " + (_page + 1) + " / " + _pageCount
                 : "";
             string refreshText = "";
             if (_controller.WorkshopTopEnabled)
             {
-                if (!_controller.WorkshopAutoRefresh) refreshText = "  ·  自动抓取已关闭";
-                else if (_controller.WorkshopItems.Count == 0) refreshText = "  ·  等待首次抓取";
+                if (!_controller.WorkshopAutoRefresh) refreshText = "· Auto-fetch off";
+                else if (_controller.WorkshopItems.Count == 0) refreshText = "· Waiting for first crawl";
                 else
                 {
                     int days = _controller.WorkshopDaysUntilRefresh;
-                    refreshText = days <= 0 ? "  ·  距离下一次抓取壁纸：今天"
-                        : "  ·  距离下一次抓取壁纸还有 " + days + " 天";
+                    refreshText = days <= 0 ? "· Until next wallpaper grab: today"
+                        : "· Next Workshop refresh in " + days + " days";
                 }
             }
             _status.Text = status + summary + refreshText;
@@ -879,7 +879,7 @@ namespace SkyMatch
         protected override void OnPaint(PaintEventArgs e)
         {
             Theme.Setup(e.Graphics);
-            Theme.DrawText(e.Graphics, "创意工坊精选", Theme.FontTitle, Theme.Text, 0, 0);
+            Theme.DrawText(e.Graphics, "Workshop", Theme.FontTitle, Theme.Text, 0, 0);
             _detailsArrowRect = new Rectangle(158, 2, 28, 26);
             using (SolidBrush arrow = new SolidBrush(Theme.Text))
             {
@@ -901,8 +901,8 @@ namespace SkyMatch
             if (_detailsExpanded)
             {
                 string subtitle = _controller.Settings.PreferScenery
-                    ? "9 个未屏蔽标签各保留 100"
-                    : WorkshopContentTags.AllCount + " 个 Steam 标签各保留 50";
+                    ? "9 unblocked tags reserved 100 each"
+                    : WorkshopContentTags.AllCount + "50 reserved for each Steam tag";
                 Theme.DrawText(e.Graphics, subtitle, Theme.FontTiny, Theme.Dim, 0, 34);
             }
             base.OnPaint(e);

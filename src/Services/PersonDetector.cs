@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
@@ -100,7 +100,7 @@ namespace SkyMatch
             }
             catch (Exception ex)
             {
-                Log.Warn("人物检测失败：" + ex.Message);
+                Log.Warn("Person detection failed:" + ex.Message);
             }
             return false;
         }
@@ -118,7 +118,7 @@ namespace SkyMatch
                         "models", "yolo", "yolov8n.onnx");
                     if (!File.Exists(path))
                     {
-                        Log.Warn("人物检测模型不存在：" + path);
+                        Log.Warn("The person detection model does not exist:" + path);
                         return;
                     }
                     SessionOptions options = new SessionOptions();
@@ -126,11 +126,11 @@ namespace SkyMatch
                     options.IntraOpNumThreads = Math.Max(1, Math.Min(2, Environment.ProcessorCount - 1));
                     _session = new InferenceSession(path, options);
                     _available = true;
-                    Log.Info("人物检测模型已加载");
+                    Log.Info("Person detection model has been loaded");
                 }
                 catch (Exception ex)
                 {
-                    Log.Warn("人物检测模型加载失败：" + ex.Message);
+                    Log.Warn("Person detection model failed to load:" + ex.Message);
                     _available = false;
                 }
             }
@@ -146,7 +146,7 @@ namespace SkyMatch
             }
             catch (Exception ex)
             {
-                Log.Warn("人物检测读取预览失败：" + ex.Message);
+                Log.Warn("Person detection failed to read preview:" + ex.Message);
                 return null;
             }
         }

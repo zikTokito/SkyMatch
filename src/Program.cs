@@ -85,13 +85,13 @@ namespace SkyMatch
 
             Application.ThreadException += delegate(object sender, ThreadExceptionEventArgs e)
             {
-                Log.Error("UI 线程异常", e.Exception);
-                MessageBox.Show("SkyMatch 遇到错误：\r\n" + e.Exception.Message,
+                Log.Error("UI thread exception", e.Exception);
+                MessageBox.Show("SkyMatch encountered an error:\r\n" + e.Exception.Message,
                     "SkyMatch", MessageBoxButtons.OK, MessageBoxIcon.Error);
             };
             AppDomain.CurrentDomain.UnhandledException += delegate(object sender, UnhandledExceptionEventArgs e)
             {
-                Log.Error("未处理异常", e.ExceptionObject as Exception);
+                Log.Error("Unhandled exception", e.ExceptionObject as Exception);
             };
 
             try
@@ -100,8 +100,8 @@ namespace SkyMatch
             }
             catch (Exception ex)
             {
-                Log.Error("程序启动失败", ex);
-                MessageBox.Show("SkyMatch 启动失败：\r\n" + ex.Message, "SkyMatch",
+                Log.Error("Program startup failed", ex);
+                MessageBox.Show("SkyMatch failed to start:\r\n" + ex.Message, "SkyMatch",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             finally
@@ -204,12 +204,12 @@ namespace SkyMatch
 
                 string json = Json.Stringify(report);
                 File.WriteAllText(outputPath, json, new UTF8Encoding(false));
-                Log.Info("诊断报告已写入 " + outputPath);
+                Log.Info("Diagnostic report has been written" + outputPath);
                 return 0;
             }
             catch (Exception ex)
             {
-                Log.Error("诊断失败", ex);
+                Log.Error("Diagnosis failed", ex);
                 try
                 {
                     if (String.IsNullOrEmpty(outputPath)) outputPath = Path.Combine(AppPaths.DataDirectory, "diagnostic.json");

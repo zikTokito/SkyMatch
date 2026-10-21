@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
@@ -18,7 +18,7 @@ namespace SkyMatch
         {
             _controller = controller;
             _cards = new List<WorkshopGridCard>();
-            Text = "屏蔽列表";
+            Text = "Block list";
             StartPosition = FormStartPosition.CenterParent;
             FormBorderStyle = FormBorderStyle.FixedDialog;
             MaximizeBox = false;
@@ -30,7 +30,7 @@ namespace SkyMatch
             ClientSize = new Size(940, 680);
 
             Label title = new Label();
-            title.Text = "已屏蔽的工坊壁纸";
+            title.Text = "Blocked workshop wallpapers";
             title.Font = new Font(Theme.FontTitle.FontFamily, 16f, FontStyle.Bold);
             title.ForeColor = Theme.Text;
             title.AutoSize = true;
@@ -38,7 +38,7 @@ namespace SkyMatch
             Controls.Add(title);
 
             Label subtitle = new Label();
-            subtitle.Text = "点击卡片上的「取消屏蔽」恢复显示。";
+            subtitle.Text = "Click \"Unblock\" on the card to restore it.";
             subtitle.Font = Theme.FontSmall;
             subtitle.ForeColor = Theme.Muted;
             subtitle.AutoSize = true;
@@ -65,13 +65,13 @@ namespace SkyMatch
             _empty.ForeColor = Theme.Dim;
             _empty.Font = Theme.FontMedium;
             _empty.BackColor = Color.Transparent;
-            _empty.Text = "还没有屏蔽任何壁纸。";
+            _empty.Text = "No wallpapers have been blocked yet.";
             _empty.Visible = false;
             Controls.Add(_empty);
             _empty.BringToFront();
 
             _close = new ActionButton();
-            _close.Text = "关闭";
+            _close.Text = "Close";
             _close.Pill = true;
             _close.Size = new Size(82, 36);
             _close.Location = new Point(838, 630);
@@ -92,7 +92,7 @@ namespace SkyMatch
             foreach (WallpaperItem item in items)
             {
                 WorkshopGridCard card = new WorkshopGridCard(item, false);
-                card.BlockLabel = "取消屏蔽";
+                card.BlockLabel = "Unblock";
                 card.Size = new Size(282, 218);
                 card.Margin = new Padding(0, 0, 10, 10);
                 card.BlockRequested += delegate(WallpaperItem blocked)
@@ -103,7 +103,7 @@ namespace SkyMatch
                 card.BlockHovered += delegate
                 {
                     Rectangle anchor = card.RectangleToScreen(card.BlockBounds);
-                    _tip.ShowBelow("取消后再次抓取就会显示在工坊中", this, anchor);
+                    _tip.ShowBelow("After canceling and grabbing again, it will be displayed in the workshop.", this, anchor);
                 };
                 card.BlockUnhovered += delegate { _tip.HideTip(); };
                 _cards.Add(card);

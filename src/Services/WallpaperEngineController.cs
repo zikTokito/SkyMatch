@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -67,17 +67,17 @@ namespace SkyMatch
             WallpaperApplyResult result = new WallpaperApplyResult();
             if (String.IsNullOrEmpty(target) || !File.Exists(target))
             {
-                result.Message = "壁纸文件不存在，Wallpaper Engine 无法加载。";
+                result.Message = "The wallpaper file does not exist and Wallpaper Engine cannot load it.";
                 return result;
             }
             if (!IsAvailable)
             {
-                result.Message = "没有找到 Wallpaper Engine 可执行文件。";
+                result.Message = "Wallpaper Engine executable not found.";
                 return result;
             }
             if (!await EnsureRunningAsync().ConfigureAwait(false))
             {
-                result.Message = "Wallpaper Engine 未运行，自动启动失败。请先打开 Wallpaper Engine。";
+                result.Message = "Wallpaper Engine is not running and auto-start failed. Please open Wallpaper Engine first.";
                 return result;
             }
 
@@ -101,22 +101,22 @@ namespace SkyMatch
                     // Wallpaper Engine load asynchronously.
                     if (process == null)
                     {
-                        result.Message = "无法启动 Wallpaper Engine 控制进程。";
+                        result.Message = "Unable to start Wallpaper Engine control process.";
                         return result;
                     }
                 }
             }
             catch (Exception ex)
             {
-                Log.Error("调用 Wallpaper Engine 失败", ex);
-                result.Message = "切换命令执行失败：" + ex.Message;
+                Log.Error("Failed to call Wallpaper Engine", ex);
+                result.Message = "The switch command execution failed:" + ex.Message;
                 return result;
             }
 
             result.Success = true;
             result.Verified = false;
             result.ActivePath = target;
-            result.Message = "切换命令已发送，Wallpaper Engine 正在加载。";
+            result.Message = "The switch command has been sent and Wallpaper Engine is loading.";
             return result;
         }
 
@@ -143,7 +143,7 @@ namespace SkyMatch
             }
             catch (Exception ex)
             {
-                Log.Error("启动 Wallpaper Engine 失败", ex);
+                Log.Error("Failed to start Wallpaper Engine", ex);
             }
             return false;
         }

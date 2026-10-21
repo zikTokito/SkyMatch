@@ -33,7 +33,7 @@ namespace SkyMatch
 
     public static class AgeRatingInfo
     {
-        private static readonly string[] Names = { "全年龄", "青少年", "成人" };
+        private static readonly string[] Names = { "Everyone", "Teen", "Mature" };
 
         public static AgeRating[] All
         {
@@ -43,7 +43,7 @@ namespace SkyMatch
         public static string Name(AgeRating rating)
         {
             int i = (int)rating;
-            return i >= 0 && i < Names.Length ? Names[i] : "全年龄";
+            return i >= 0 && i < Names.Length ? Names[i] : "Everyone";
         }
 
         public static int MaskOf(AgeRating rating)
@@ -56,7 +56,7 @@ namespace SkyMatch
             List<string> selected = new List<string>();
             foreach (AgeRating rating in All)
                 if ((mask & MaskOf(rating)) != 0) selected.Add(Name(rating));
-            return selected.Count == 0 ? "未选择" : String.Join(" + ", selected.ToArray());
+            return selected.Count == 0 ? "Not selected" : String.Join(" + ", selected.ToArray());
         }
 
         public static AgeRating FromText(string value)
@@ -85,13 +85,13 @@ namespace SkyMatch
 
     public static class TimeSlotInfo
     {
-        private static readonly string[] Names = { "清晨", "白天", "黄昏", "夜晚" };
+        private static readonly string[] Names = { "Dawn", "Day", "Dusk", "Night" };
         private static readonly string[] English = { "DAWN", "DAY", "DUSK", "NIGHT" };
 
         public static string Name(TimeSlot slot)
         {
             int i = (int)slot;
-            return i >= 0 && i < Names.Length ? Names[i] : "未知";
+            return i >= 0 && i < Names.Length ? Names[i] : "Unknown";
         }
 
         public static string EnglishName(TimeSlot slot)
@@ -148,10 +148,10 @@ namespace SkyMatch
         {
             switch (slot)
             {
-                case TimeSlot.Dawn: return "暖色晨光、柔和低对比的清晨氛围";
-                case TimeSlot.Day: return "明亮通透、饱和度充足的白天画面";
-                case TimeSlot.Dusk: return "暖橙、紫红或低角度光线的黄昏氛围";
-                default: return "深色夜空、月光、灯火与霓虹";
+                case TimeSlot.Dawn: return "Warm morning light, soft and low contrast";
+                case TimeSlot.Day: return "Bright, open daylight with full color";
+                case TimeSlot.Dusk: return "Warm orange, magenta, or low-angle evening light";
+                default: return "Dark sky, moonlight, city lights, and neon";
             }
         }
     }
@@ -160,7 +160,7 @@ namespace SkyMatch
     {
         private static readonly string[] Names =
         {
-            "晴天", "晴夜", "多云", "阴天", "雨天", "雷雨", "雪天", "雾天"
+            "Clear", "Clear Night", "Cloudy", "Overcast", "Rain", "Storm", "Snow", "Fog"
         };
 
         private static readonly string[] English =
@@ -170,13 +170,13 @@ namespace SkyMatch
 
         private static readonly string[] Short =
         {
-            "晴", "夜", "云", "阴", "雨", "雷", "雪", "雾"
+            "Sun", "Night", "Cloud", "Grey", "Rain", "Storm", "Snow", "Fog"
         };
 
         public static string Name(WeatherKind kind)
         {
             int i = (int)kind;
-            return i >= 0 && i < Names.Length ? Names[i] : "未知";
+            return i >= 0 && i < Names.Length ? Names[i] : "Unknown";
         }
 
         public static string EnglishName(WeatherKind kind)
@@ -222,15 +222,15 @@ namespace SkyMatch
         {
             switch (kind)
             {
-                case WeatherKind.ClearDay: return "明亮、暖色与通透的天空";
-                case WeatherKind.ClearNight: return "深色夜空、月色与霓虹高光";
-                case WeatherKind.Cloudy: return "柔和云层与低饱和色调";
-                case WeatherKind.Overcast: return "灰蓝、安静而内敛的画面";
-                case WeatherKind.Rain: return "冷蓝灰影调与被雨打湿的氛围";
-                case WeatherKind.Storm: return "高对比、戏剧性的暗色画面";
-                case WeatherKind.Snow: return "冷白、通透的雪色画面";
-                case WeatherKind.Fog: return "低对比、朦胧的雾感画面";
-                default: return "与此刻天空相称的画面";
+                case WeatherKind.ClearDay: return "Bright, warm, clear sky";
+                case WeatherKind.ClearNight: return "Dark sky, moonlight, and neon highlights";
+                case WeatherKind.Cloudy: return "Soft clouds and muted colors";
+                case WeatherKind.Overcast: return "Quiet grey-blue atmosphere";
+                case WeatherKind.Rain: return "Cool blue-grey tones and wet surfaces";
+                case WeatherKind.Storm: return "High-contrast, dramatic darkness";
+                case WeatherKind.Snow: return "Cold white, crisp snow tones";
+                case WeatherKind.Fog: return "Low-contrast, hazy atmosphere";
+                default: return "A scene that fits the sky outside";
             }
         }
     }
@@ -283,7 +283,7 @@ namespace SkyMatch
         {
             get
             {
-                if (String.IsNullOrEmpty(Name)) return "未知位置";
+                if (String.IsNullOrEmpty(Name)) return "Unknown location";
                 return Name;
             }
         }
@@ -330,7 +330,7 @@ namespace SkyMatch
         {
             get
             {
-                string[] names = { "周日", "周一", "周二", "周三", "周四", "周五", "周六" };
+                string[] names = { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" };
                 return names[(int)Date.DayOfWeek];
             }
         }
@@ -486,10 +486,10 @@ namespace SkyMatch
         {
             get
             {
-                if (IsVideo) return "视频";
+                if (IsVideo) return "Video";
                 if (IsWeb) return "Web";
-                if (String.Equals(Type, "scene", StringComparison.OrdinalIgnoreCase)) return "场景";
-                return String.IsNullOrEmpty(Type) ? "壁纸" : Type;
+                if (String.Equals(Type, "scene", StringComparison.OrdinalIgnoreCase)) return "Scene";
+                return String.IsNullOrEmpty(Type) ? "Wallpaper" : Type;
             }
         }
 
@@ -535,7 +535,7 @@ namespace SkyMatch
         [ScriptIgnore]
         public string ActiveLabel
         {
-            get { return IsActive ? "正在桌面播放" : ""; }
+            get { return IsActive ? "Playing on desktop" : ""; }
         }
     }
 

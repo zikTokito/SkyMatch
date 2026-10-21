@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Globalization;
 using System.Windows.Forms;
 
 namespace SkyMatch
@@ -93,8 +94,8 @@ namespace SkyMatch
 
         private void DrawLoading(Graphics g, RectangleF rect)
         {
-            Theme.DrawText(g, "正在读取此刻的天气…", Theme.FontMedium, Theme.Alpha(Theme.Text, 190), 30, 30);
-            Theme.DrawText(g, "定位 · 云端天气 · 壁纸匹配", Theme.FontSmall, Theme.Muted, 31, 62);
+            Theme.DrawText(g, "Reading the current weather...", Theme.FontMedium, Theme.Alpha(Theme.Text, 190), 30, 30);
+            Theme.DrawText(g, "Locating · Weather · Wallpaper matching", Theme.FontSmall, Theme.Muted, 31, 62);
             using (SolidBrush brush = new SolidBrush(Theme.Alpha(Theme.White, 20)))
             {
                 g.FillRectangle(brush, 30, rect.Height - 84, 110, 12);
@@ -115,7 +116,7 @@ namespace SkyMatch
             float y = 24;
             IconPainter.Pin(g, new RectangleF(x, y + 1, 14, 14), Theme.Alpha(accent, 230));
             Theme.DrawText(g, data.Location.CityDistrict, Theme.FontBold, Theme.Text, x + 20, y);
-            string sub = DateTime.Now.ToString("M月d日 HH:mm") + " · " + current.Description
+            string sub = DateTime.Now.ToString("MMM d HH:mm", CultureInfo.InvariantCulture) + " · " + current.Description
                 + " · " + TimeSlotInfo.Name(TimeSlotInfo.Current());
             Theme.DrawText(g, sub, Theme.FontSmall, Theme.Alpha(Theme.Muted, 220), x + 20, y + 21);
 
@@ -124,7 +125,7 @@ namespace SkyMatch
                 RectangleF badge = new RectangleF(x + 20, y + 47, 64, 20);
                 using (SolidBrush brush = new SolidBrush(Theme.Alpha(accent, 28)))
                     Theme.FillRounded(g, brush, badge, 10);
-                Theme.DrawText(g, "IP 定位", Theme.FontTiny, Theme.Alpha(accent, 225), badge.X, badge.Y + 3);
+                Theme.DrawText(g, "IP positioning", Theme.FontTiny, Theme.Alpha(accent, 225), badge.X, badge.Y + 3);
             }
 
             string temp = Theme.Temperature(current.Temperature);
@@ -134,9 +135,9 @@ namespace SkyMatch
             SizeF tempSize = g.MeasureString(temp, Theme.FontHuge);
             Theme.DrawText(g, current.Description, Theme.FontMedium, Theme.Text,
                 x + tempSize.Width + 6, tempY + 29);
-            Theme.DrawText(g, "体感 " + Theme.Temperature(current.ApparentTemperature),
+            Theme.DrawText(g, "Feels like " + Theme.Temperature(current.ApparentTemperature),
                 Theme.FontSmall, Theme.Alpha(Theme.Muted, 235), x + tempSize.Width + 8, tempY + 58);
-            Theme.DrawText(g, "最高 " + Theme.Temperature(current.High) + "  ·  最低 "
+            Theme.DrawText(g, "High " + Theme.Temperature(current.High) + "  ·  Low "
                 + Theme.Temperature(current.Low), Theme.FontSmall, Theme.Alpha(Theme.Muted, 235),
                 x + tempSize.Width + 8, tempY + 79);
 
@@ -146,20 +147,20 @@ namespace SkyMatch
             float available = rect.Width - 56;
             int statCount = rect.Width >= 420 ? 7 : 5;
             float statW = available / statCount;
-            DrawStat(g, x, statsY, "湿度", Theme.Percentage(current.Humidity), statW);
-            DrawStat(g, x + statW, statsY, "风速", current.WindSpeed.ToString("0.0") + " km/h", statW);
-            DrawStat(g, x + statW * 2, statsY, "降雨概率", Theme.Percentage(current.PrecipitationProbability), statW);
+            DrawStat(g, x, statsY, "humidity", Theme.Percentage(current.Humidity), statW);
+            DrawStat(g, x + statW, statsY, "wind speed", current.WindSpeed.ToString("0.0") + " km/h", statW);
+            DrawStat(g, x + statW * 2, statsY, "Rain chance", Theme.Percentage(current.PrecipitationProbability), statW);
             if (statCount == 7)
             {
-                DrawStat(g, x + statW * 3, statsY, "云量", Theme.Percentage(current.CloudCover), statW);
-                DrawStat(g, x + statW * 4, statsY, "降水量", current.Precipitation.ToString("0.0") + " mm", statW);
-                DrawStat(g, x + statW * 5, statsY, "日出", current.Sunrise.HasValue ? Theme.Clock(current.Sunrise.Value) : "--:--", statW);
-                DrawStat(g, x + statW * 6, statsY, "日落", current.Sunset.HasValue ? Theme.Clock(current.Sunset.Value) : "--:--", statW);
+                DrawStat(g, x + statW * 3, statsY, "Cloud cover", Theme.Percentage(current.CloudCover), statW);
+                DrawStat(g, x + statW * 4, statsY, "precipitation", current.Precipitation.ToString("0.0") + " mm", statW);
+                DrawStat(g, x + statW * 5, statsY, "sunrise", current.Sunrise.HasValue ? Theme.Clock(current.Sunrise.Value) : "--:--", statW);
+                DrawStat(g, x + statW * 6, statsY, "Sunset", current.Sunset.HasValue ? Theme.Clock(current.Sunset.Value) : "--:--", statW);
             }
             else
             {
-                DrawStat(g, x + statW * 3, statsY, "日出", current.Sunrise.HasValue ? Theme.Clock(current.Sunrise.Value) : "--:--", statW);
-                DrawStat(g, x + statW * 4, statsY, "日落", current.Sunset.HasValue ? Theme.Clock(current.Sunset.Value) : "--:--", statW);
+                DrawStat(g, x + statW * 3, statsY, "sunrise", current.Sunrise.HasValue ? Theme.Clock(current.Sunrise.Value) : "--:--", statW);
+                DrawStat(g, x + statW * 4, statsY, "Sunset", current.Sunset.HasValue ? Theme.Clock(current.Sunset.Value) : "--:--", statW);
             }
         }
 
@@ -230,7 +231,7 @@ namespace SkyMatch
             BackColor = Theme.Bg;
             Cursor = Cursors.Hand;
             _applyButton = new ActionButton();
-            _applyButton.Text = "立即切换";
+            _applyButton.Text = "Apply now";
             _applyButton.Primary = true;
             _applyButton.Pill = true;
             _applyButton.Size = new Size(106, 34);
@@ -243,7 +244,7 @@ namespace SkyMatch
             Controls.Add(_applyButton);
 
             _detailButton = new ActionButton();
-            _detailButton.Text = "详情";
+            _detailButton.Text = "Details";
             _detailButton.Size = new Size(62, 34);
             _detailButton.Pill = true;
             _detailButton.Font = Theme.FontSmall;
@@ -292,7 +293,7 @@ namespace SkyMatch
                 if (value != null)
                 {
                     _applyButton.AccentColor = Theme.Accent(value.MatchWeather);
-                    _applyButton.Text = value.IsActive ? "已匹配" : "立即切换";
+                    _applyButton.Text = value.IsActive ? "Matched" : "Apply now";
                     _applyButton.Enabled = !value.IsActive;
                 }
                 _detailButton.Visible = value != null;
@@ -306,7 +307,7 @@ namespace SkyMatch
         public void SyncActiveState()
         {
             if (_wallpaper == null) return;
-            _applyButton.Text = _wallpaper.IsActive ? "已匹配" : "立即切换";
+            _applyButton.Text = _wallpaper.IsActive ? "Matched" : "Apply now";
             _applyButton.Enabled = !_wallpaper.IsActive;
             _applyButton.Invalidate();
         }
@@ -430,7 +431,7 @@ namespace SkyMatch
             bool timeApproximate = _wallpaper != null && _weather != null
                 && _wallpaper.PrimaryTime != TimeSlotInfo.Current();
             bool approximate = weatherApproximate || timeApproximate;
-            string labelText = approximate ? "此刻推荐 · 近似" : "此刻推荐";
+            string labelText = approximate ? "Recommended at the moment · Approximate" : "Recommended Now";
             float labelWidth = approximate ? 112 : 84;
             RectangleF label = new RectangleF(20, 18, labelWidth, 22);
             using (SolidBrush brush = new SolidBrush(Color.FromArgb(34, 255, 255, 255)))
@@ -455,8 +456,8 @@ namespace SkyMatch
 
             if (_wallpaper == null)
             {
-                Theme.DrawText(g, "正在为此刻寻找合适的壁纸…", Theme.FontBold, Theme.Text, 22, rect.Height - 118);
-                Theme.DrawText(g, "基于画面亮度、色彩与文字线索自动挑选", Theme.FontSmall, Theme.Muted,
+                Theme.DrawText(g, "Looking for the right wallpaper for this moment…", Theme.FontBold, Theme.Text, 22, rect.Height - 118);
+                Theme.DrawText(g, "Automatic selection based on screen brightness, color and text clues", Theme.FontSmall, Theme.Muted,
                     22, rect.Height - 92);
                 _applyButton.Visible = false;
                 _detailButton.Visible = false;
@@ -466,21 +467,21 @@ namespace SkyMatch
             string title = Theme.FitText(g, _wallpaper.Title, Theme.FontBold, rect.Width - 44);
             Theme.DrawText(g, title, Theme.FontBold, Theme.Text, 22, rect.Height - 118);
             string reason = _wallpaper.IsManual
-                ? "已手动锁定为「" + WeatherKindInfo.Name(_wallpaper.MatchWeather) + "」"
+                ? "Manually locked as \"" + WeatherKindInfo.Name(_wallpaper.MatchWeather) + "\""
                 : _wallpaper.Reason;
             if (weatherApproximate)
-                reason = "暂无「" + WeatherKindInfo.Name(_weather.Current.Kind) + "」专属壁纸，选用相近风格";
+                reason = "No exact \"" + WeatherKindInfo.Name(_weather.Current.Kind) + "\" wallpaper; using a similar style";
             else if (timeApproximate)
-                reason = "暂无「" + TimeSlotInfo.Name(TimeSlotInfo.Current()) + "」专属壁纸，选用相近时段";
+                reason = "No exact \"" + TimeSlotInfo.Name(TimeSlotInfo.Current()) + "\" wallpaper; using a similar time of day";
             Theme.DrawText(g, Theme.FitText(g, reason, Theme.FontSmall, rect.Width - 44),
                 Theme.FontSmall, Theme.Alpha(Theme.Text, 190), 22, rect.Height - 94);
             string meta = _wallpaper.TypeLabel + " · " + TimeSlotInfo.Name(_wallpaper.PrimaryTime)
-                + (approximate ? " · 近似推荐" : " · 匹配 "
+                + (approximate ? "· Approximate recommendation" : "· Match"
                 + Math.Round(_wallpaper.Confidence).ToString("0") + "%");
             Theme.DrawText(g, meta, Theme.FontTiny, Theme.Alpha(accent, 225), 22, rect.Height - 72);
 
             _applyButton.AccentColor = accent;
-            _applyButton.Text = _wallpaper.IsActive ? "已匹配" : "立即切换";
+            _applyButton.Text = _wallpaper.IsActive ? "Matched" : "Apply now";
             _applyButton.Enabled = !_wallpaper.IsActive;
             _detailButton.Visible = true;
             _applyButton.Visible = true;
@@ -539,13 +540,13 @@ namespace SkyMatch
                     startIndex = Math.Max(0, _weather.Hourly.Count - 1);
             }
             int count = Math.Min(maxHours, _weather == null ? 0 : _weather.Hourly.Count - startIndex);
-            string hourlyTitle = "接下来 " + count + " 小时";
+            string hourlyTitle = "Next " + count + " hours";
             Theme.DrawText(e.Graphics, hourlyTitle, Theme.FontBold, Theme.Text, 20, 14);
-            Theme.DrawText(e.Graphics, "逐小时预报", Theme.FontTiny, Theme.Dim,
+            Theme.DrawText(e.Graphics, "Hourly Forecast", Theme.FontTiny, Theme.Dim,
                 20 + e.Graphics.MeasureString(hourlyTitle, Theme.FontBold).Width + 12, 17);
             if (_weather == null || _weather.Hourly.Count == 0)
             {
-                Theme.DrawText(e.Graphics, "正在载入逐小时天气…", Theme.FontSmall, Theme.Dim, 20, 48);
+                Theme.DrawText(e.Graphics, "Loading hourly weather...", Theme.FontSmall, Theme.Dim, 20, 48);
                 return;
             }
             float left = 16;
@@ -560,7 +561,7 @@ namespace SkyMatch
                     using (Pen pen = new Pen(Color.FromArgb(22, 255, 255, 255), 1f))
                         e.Graphics.DrawLine(pen, x, top + 2, x, Height - 12);
                 }
-                string time = h.Time.Hour == now.Hour && h.Time.Date == now.Date ? "现在" : Theme.Clock(h.Time);
+                string time = h.Time.Hour == now.Hour && h.Time.Date == now.Date ? "Now" : Theme.Clock(h.Time);
                 Theme.DrawText(e.Graphics, time, Theme.FontTiny, i == 0 ? Theme.Text : Theme.Muted,
                     x + (cell - e.Graphics.MeasureString(time, Theme.FontTiny).Width) / 2f, top);
                 RectangleF icon = new RectangleF(x + cell / 2f - 9, top + 16, 18, 18);
@@ -654,12 +655,12 @@ namespace SkyMatch
             bool fullscreen = host != null && host.WindowState == FormWindowState.Maximized;
             int maxDays = fullscreen ? (effectiveWidth >= 1500 ? 7 : 5) : 8;
             int count = Math.Min(maxDays, _weather == null ? 0 : _weather.Daily.Count);
-            Theme.DrawText(e.Graphics, "未来 " + count + " 天", Theme.FontBold, Theme.Text, 20, 16);
-            Theme.DrawText(e.Graphics, fullscreen ? "把一周的天空提前铺开" : "四列两天，提前安排接下来的天气",
+            Theme.DrawText(e.Graphics, "Next " + count + " days", Theme.FontBold, Theme.Text, 20, 16);
+            Theme.DrawText(e.Graphics, fullscreen ? "The week ahead, at a glance" : "Four columns, two rows: the days ahead",
                 Theme.FontTiny, Theme.Dim, 20, 38);
             if (_weather == null || _weather.Daily.Count == 0)
             {
-                Theme.DrawText(e.Graphics, "正在载入预报…", Theme.FontSmall, Theme.Dim, 20, 74);
+                Theme.DrawText(e.Graphics, "Loading forecast…", Theme.FontSmall, Theme.Dim, 20, 74);
                 return;
             }
             float left = 14;
@@ -716,9 +717,9 @@ namespace SkyMatch
                 using (Pen border = new Pen(Color.FromArgb(38, 255, 255, 255), 1f))
                     Theme.DrawRounded(e.Graphics, border, tile, 10);
 
-                string label = i == 0 ? "今天" : day.Weekday;
+                string label = i == 0 ? "Today" : day.Weekday;
                 Theme.DrawText(e.Graphics, label, Theme.FontBold, Theme.Text, tile.X + 10, tile.Y + 8);
-                Theme.DrawText(e.Graphics, day.Date.ToString("M/d"), Theme.FontTiny,
+                Theme.DrawText(e.Graphics, day.Date.ToString("M/d", CultureInfo.InvariantCulture), Theme.FontTiny,
                     Theme.Alpha(Theme.Text, 175), tile.X + 10, tile.Y + 28);
                 bool compact = tile.Height < 150;
                 WeatherGlyph.Draw(e.Graphics, day.Kind,
@@ -728,13 +729,13 @@ namespace SkyMatch
                 SizeF hs = e.Graphics.MeasureString(high, Theme.FontBold);
                 Theme.DrawText(e.Graphics, high, Theme.FontBold, Theme.Text,
                     tile.X + (tile.Width - hs.Width) / 2f, tile.Y + (compact ? 70 : 84));
-                string low = "低 " + Theme.Temperature(day.Min);
+                string low = "Low " + Theme.Temperature(day.Min);
                 SizeF ls = e.Graphics.MeasureString(low, Theme.FontTiny);
                 Theme.DrawText(e.Graphics, low, Theme.FontTiny, Theme.Alpha(Theme.Text, 210),
                     tile.X + (tile.Width - ls.Width) / 2f, tile.Y + (compact ? 90 : 105));
                 if (!compact && day.PrecipitationProbability >= 10)
                 {
-                    string rain = "降水 " + Theme.Percentage(day.PrecipitationProbability);
+                    string rain = "precipitation" + Theme.Percentage(day.PrecipitationProbability);
                     SizeF rs = e.Graphics.MeasureString(rain, Theme.FontTiny);
                     Theme.DrawText(e.Graphics, rain, Theme.FontTiny,
                         Theme.Alpha(Theme.Accent(WeatherKind.Rain), 240),
@@ -877,10 +878,10 @@ namespace SkyMatch
                 Theme.FillRounded(e.Graphics, brush, rect, 16);
             using (Pen pen = new Pen(Theme.BorderSoft, 1f))
                 Theme.DrawRounded(e.Graphics, pen, rect, 16);
-            Theme.DrawText(e.Graphics, "壁纸天气图谱", Theme.FontBold, Theme.Text, 20, 16);
+            Theme.DrawText(e.Graphics, "Weather Atlas", Theme.FontBold, Theme.Text, 20, 16);
             int total = 0;
             if (_counts != null) foreach (int n in _counts.Values) total += n;
-            Theme.DrawText(e.Graphics, total + " 张壁纸 · 左右切换 · 点图看大图", Theme.FontTiny, Theme.Dim, 20, 38);
+            Theme.DrawText(e.Graphics, total + " wallpapers · hover for a larger preview · click for details", Theme.FontTiny, Theme.Dim, 20, 38);
 
             _cells.Clear();
             float left = 16;
@@ -989,9 +990,9 @@ namespace SkyMatch
             _forecast = new ForecastPanel();
             _coverage = new CoveragePanel();
             _refresh = new ActionButton();
-            _refresh.Text = "刷新天气";
+            _refresh.Text = "Refresh weather";
             _refresh.Icon = ActionButton.IconKind.Refresh;
-            _refresh.Size = new Size(112, 34);
+            _refresh.Size = new Size(150, 34);
             _refresh.Pill = true;
             _refresh.AccentColor = Theme.Yellow;
             _refresh.Click += async delegate { await _controller.RefreshWeatherAsync(true); };
@@ -1001,7 +1002,7 @@ namespace SkyMatch
             _rotateToggle.Checked = _controller.Settings.RecommendationRotateEnabled;
             _rotateLabel = new Label();
             _rotateLabel.AutoSize = true;
-            _rotateLabel.Text = "自动更换壁纸";
+            _rotateLabel.Text = "Auto-change wallpaper";
             _rotateLabel.Font = Theme.FontSmall;
             _rotateLabel.ForeColor = Theme.Text;
             _rotateLabel.BackColor = Color.Transparent;
@@ -1027,7 +1028,7 @@ namespace SkyMatch
             };
 
             _matchNow = new ActionButton();
-            _matchNow.Text = "按天气匹配";
+            _matchNow.Text = "Match by weather";
             _matchNow.Icon = ActionButton.IconKind.Play;
             _matchNow.Size = new Size(116, 32);
             _matchNow.Pill = true;
@@ -1048,7 +1049,7 @@ namespace SkyMatch
             _match.ApplyClicked += async delegate
             {
                 if (_match.Wallpaper != null)
-                    await _controller.ApplyWallpaperAsync(_match.Wallpaper, false, "从此刻推荐应用");
+                    await _controller.ApplyWallpaperAsync(_match.Wallpaper, false, "Recommended apps from now on");
             };
             _match.DetailsClicked += delegate
             {
@@ -1214,7 +1215,7 @@ namespace SkyMatch
         private void RefreshState()
         {
             _refresh.Enabled = !_controller.IsRefreshingWeather;
-            _refresh.Text = _controller.IsRefreshingWeather ? "更新中…" : "刷新天气";
+            _refresh.Text = _controller.IsRefreshingWeather ? "Updating…" : "Refresh weather";
             _refresh.Invalidate();
             SyncRotationUi();
             Invalidate(new Rectangle(0, 0, Width, 54));
@@ -1280,7 +1281,7 @@ namespace SkyMatch
 
         private int StatusLeft()
         {
-            string status = _controller.Settings.AutoFollow ? "自动跟随已开启" : "自动跟随已暂停";
+            string status = _controller.Settings.AutoFollow ? "Auto-follow is on" : "Auto-follow is paused";
             Size size = TextRenderer.MeasureText(status, Theme.FontTiny);
             return Width - _refresh.Width - size.Width - 34;
         }
@@ -1288,11 +1289,11 @@ namespace SkyMatch
         protected override void OnPaint(PaintEventArgs e)
         {
             Theme.Setup(e.Graphics);
-            Theme.DrawText(e.Graphics, Theme.Greeting() + "，这里是今天的天空", Theme.FontTiny, Theme.Dim, 2, 0);
-            string location = _controller.Weather == null ? "定位中…" : _controller.Weather.Location.DisplayName;
-            Theme.DrawText(e.Graphics, "此刻 · " + location, Theme.FontTitle, Theme.Text, 0, 15);
+            Theme.DrawText(e.Graphics, Theme.Greeting() + ", here is today’s sky", Theme.FontTiny, Theme.Dim, 2, 0);
+            string location = _controller.Weather == null ? "Positioning…" : _controller.Weather.Location.DisplayName;
+            Theme.DrawText(e.Graphics, "Right now · " + location, Theme.FontTitle, Theme.Text, 0, 15);
 
-            string status = _controller.Settings.AutoFollow ? "自动跟随已开启" : "自动跟随已暂停";
+            string status = _controller.Settings.AutoFollow ? "Auto-follow is on" : "Auto-follow is paused";
             Color statusColor = _controller.Settings.AutoFollow ? Theme.Green : Theme.Dim;
             float sx = StatusLeft();
             using (SolidBrush dot = new SolidBrush(statusColor))
@@ -1300,7 +1301,7 @@ namespace SkyMatch
             Theme.DrawText(e.Graphics, status, Theme.FontTiny, statusColor, sx + 12, 11);
             if (_controller.Weather != null)
             {
-                Theme.DrawText(e.Graphics, Theme.Clock(_controller.Weather.Current.ObservedAt) + " 观测",
+                Theme.DrawText(e.Graphics, Theme.Clock(_controller.Weather.Current.ObservedAt) + " observed",
                     Theme.FontTiny, Theme.Dim, sx + 12, 26);
             }
             base.OnPaint(e);

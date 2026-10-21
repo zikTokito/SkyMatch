@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -95,12 +95,12 @@ namespace SkyMatch
             EnsureInitialized(algorithm);
             if (!_available)
             {
-                result.Error = "CLIP 模型不可用";
+                result.Error = "CLIP model not available";
                 return result;
             }
             if (String.IsNullOrEmpty(previewPath) || !File.Exists(previewPath))
             {
-                result.Error = "预览图不存在";
+                result.Error = "Preview image does not exist";
                 return result;
             }
             try
@@ -130,14 +130,14 @@ namespace SkyMatch
                 result.CharacterProbability = charProb;
                 result.CharacterFocus = charProb >= (_largeModel ? 0.63 : 0.55);
                 result.Available = true;
-                result.Reason = "CLIP 零样本：天气「" + WeatherKindInfo.Name(result.Weather)
-                    + "」，时段「" + TimeSlotInfo.Name(result.Time) + "」，"
-                    + (result.CharacterFocus ? "主人物" : "主风景");
+                result.Reason = "CLIP zero sample: weather \"" + WeatherKindInfo.Name(result.Weather)
+                    + "\", time period \"" + TimeSlotInfo.Name(result.Time) + "」，"
+                    + (result.CharacterFocus ? "main character" : "main scenery");
                 return result;
             }
             catch (Exception ex)
             {
-                Log.Warn("CLIP 识图失败：" + ex.Message);
+                Log.Warn("CLIP image recognition failed:" + ex.Message);
                 result.Error = ex.Message;
                 return result;
             }
@@ -165,7 +165,7 @@ namespace SkyMatch
                     string promptPath = Path.Combine(dir, "prompt_embeddings.json");
                     if (!File.Exists(vision) || !File.Exists(promptPath))
                     {
-                        Log.Warn("CLIP 模型文件不完整：" + dir);
+                        Log.Warn("CLIP model file is incomplete:" + dir);
                         return;
                     }
                     JavaScriptSerializer serializer = new JavaScriptSerializer();
@@ -177,11 +177,11 @@ namespace SkyMatch
                     options.IntraOpNumThreads = Math.Max(1, Math.Min(4, Environment.ProcessorCount - 1));
                     _session = new InferenceSession(vision, options);
                     _available = true;
-                    Log.Info("CLIP 识图模型已加载：" + (large ? "ViT-L/14" : "ViT-B/32"));
+                    Log.Info("CLIP image recognition model has been loaded:" + (large ? "ViT-L/14" : "ViT-B/32"));
                 }
                 catch (Exception ex)
                 {
-                    Log.Warn("CLIP 模型加载失败：" + ex.Message);
+                    Log.Warn("CLIP model loading failed:" + ex.Message);
                     _available = false;
                 }
             }
@@ -382,7 +382,7 @@ namespace SkyMatch
             }
             catch (Exception ex)
             {
-                Log.Warn("CLIP 读取预览失败：" + ex.Message);
+                Log.Warn("CLIP failed to read preview:" + ex.Message);
                 return null;
             }
         }

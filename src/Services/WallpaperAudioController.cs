@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
@@ -111,7 +111,7 @@ namespace SkyMatch
             }
             catch (Exception ex)
             {
-                Log.Warn("读取壁纸音量失败：" + ex.Message);
+                Log.Warn("Failed to read wallpaper volume:" + ex.Message);
                 return false;
             }
         }
@@ -143,7 +143,7 @@ namespace SkyMatch
             }
             catch (Exception ex)
             {
-                Log.Warn("设置壁纸音量失败：" + ex.Message);
+                Log.Warn("Failed to set wallpaper volume:" + ex.Message);
                 return false;
             }
         }
@@ -174,7 +174,7 @@ namespace SkyMatch
             }
             catch (Exception ex)
             {
-                Log.Warn("设置壁纸静音失败：" + ex.Message);
+                Log.Warn("Failed to set wallpaper to mute:" + ex.Message);
                 return false;
             }
         }

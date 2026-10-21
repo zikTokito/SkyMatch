@@ -161,14 +161,14 @@ namespace SkyMatch
                         Theme.FillRounded(e.Graphics, brush, active, 11);
                     using (SolidBrush dot = new SolidBrush(Theme.Green))
                         e.Graphics.FillEllipse(dot, active.X + 9, active.Y + 8, 6, 6);
-                    Theme.DrawText(e.Graphics, "桌面中", Theme.FontTiny, Theme.Green, active.X + 20, active.Y + 3);
+                    Theme.DrawText(e.Graphics, "In use", Theme.FontTiny, Theme.Green, active.X + 20, active.Y + 3);
                 }
                 else if (_wallpaper.IsManual)
                 {
                     RectangleF manual = new RectangleF(Width - 54, 12, 42, 22);
                     using (SolidBrush brush = new SolidBrush(Color.FromArgb(45, 255, 255, 255)))
                         Theme.FillRounded(e.Graphics, brush, manual, 11);
-                    Theme.DrawText(e.Graphics, "手动", Theme.FontTiny, Theme.Muted, manual.X + 8, manual.Y + 3);
+                    Theme.DrawText(e.Graphics, "Manual", Theme.FontTiny, Theme.Muted, manual.X + 8, manual.Y + 3);
                 }
 
                 _blockRect = RectangleF.Empty;
@@ -179,7 +179,7 @@ namespace SkyMatch
                 Theme.DrawText(e.Graphics, title, Theme.FontBold, Theme.Text, 14, textY);
                 string meta = _wallpaper.TypeLabel + "  ·  " + TimeSlotInfo.Name(_wallpaper.PrimaryTime)
                     + "  ·  " + WeatherKindInfo.Name(kind)
-                    + (_wallpaper.IsManual ? "  ·  手动校准" : "  ·  " + Math.Round(_wallpaper.Confidence) + "%");
+                    + (_wallpaper.IsManual ? "  ·  Manual" : "  ·  " + Math.Round(_wallpaper.Confidence) + "%");
                 Theme.DrawText(e.Graphics, meta, Theme.FontTiny, Theme.Alpha(accent, 235), 14, textY + 24);
                 Theme.DrawText(e.Graphics, Theme.FitText(e.Graphics, _wallpaper.Reason, Theme.FontTiny, Width - 28),
                     Theme.FontTiny, Theme.Dim, 14, textY + 43);
@@ -233,7 +233,7 @@ namespace SkyMatch
             _cards = new List<Control>();
 
             _search = new SearchBox();
-            _search.Placeholder = "搜索标题、标签或描述…";
+            _search.Placeholder = "Search title, tag, or description…";
             _search.Size = new Size(260, 36);
             _search.TextChanged += delegate { Rebuild(); };
 
@@ -267,7 +267,7 @@ namespace SkyMatch
 
             _divider = new LibraryDivider();
             _divider.Height = 44;
-            _divider.Text = "以下为工坊同类型壁纸（悬停看大图，点击查看详情/订阅）";
+            _divider.Text = "The following are wallpapers of the same type in the workshop (hover to see the larger image, click to view details/subscribe)";
             _divider.Visible = false;
 
             _hoverPanel = new WorkshopHoverPanel();
@@ -371,7 +371,7 @@ namespace SkyMatch
             int previous = _chips.SelectedIndex;
             _chips.Items.Clear();
             int total = _controller.GetLibraryWallpapers().Count;
-            _chips.Items.Add(new ChipStrip.Chip("全部", null) { Count = total });
+            _chips.Items.Add(new ChipStrip.Chip("All", null) { Count = total });
             Dictionary<WeatherKind, int> counts = _controller.CountByKindForLibrary();
             foreach (WeatherKind kind in WeatherKindInfo.All)
             {
@@ -432,8 +432,8 @@ namespace SkyMatch
                 {
                     _divider.Visible = true;
                     _divider.Width = Math.Max(400, _grid.ClientSize.Width - 20);
-                    _divider.Text = "以下为工坊同类型壁纸 · " + supplements.Count
-                        + " 张（悬停看大图，点击查看详情/订阅）";
+                    _divider.Text = "Matching Workshop wallpapers · " + supplements.Count
+                        + " items (hover for a preview, click for details/subscribe)";
                     _content.Controls.Add(_divider);
                     foreach (WallpaperItem item in supplements)
                     {
@@ -446,8 +446,8 @@ namespace SkyMatch
                 int shownCount = shown.Count + _supplementCount;
                 _empty.Visible = shownCount == 0;
                 _empty.Text = query.Length > 0 || _filter.HasValue
-                    ? "没有找到符合条件的壁纸\n换一个天气，或清空搜索词"
-                    : "还没有可用的壁纸\n请确认 Wallpaper Engine 已安装并订阅了壁纸";
+                    ? "No wallpapers match.\nTry another weather tab or clear the search."
+                    : "No wallpapers available yet.\nMake sure Wallpaper Engine is installed and you are subscribed.";
                 _empty.BringToFront();
                 UpdateHeader();
                 _hoverPanel.Visible = false;
@@ -485,7 +485,7 @@ namespace SkyMatch
         private void AddWorkshopLibraryCard(WallpaperItem item)
         {
             WorkshopGridCard card = new WorkshopGridCard(item, false);
-            card.FeaturedLabel = "工坊";
+            card.FeaturedLabel = "workshop";
             card.Margin = new Padding(0, 0, 12, 12);
             card.Hovered += delegate(WorkshopGridCard hovered) { ShowLibraryHover(hovered, item); };
             card.Unhovered += delegate { if (!IsDisposed) _hoverPanel.Visible = false; };
@@ -505,7 +505,7 @@ namespace SkyMatch
             {
                 if (IsDisposed) return;
                 Rectangle anchor = hovered.RectangleToScreen(hovered.BlockBounds);
-                _blockTip.ShowBelow("屏蔽后不会在工坊出现，可在设置中取消屏蔽", this, anchor);
+                _blockTip.ShowBelow("After blocking, it will not appear in the workshop. You can unblock it in the settings.", this, anchor);
             };
             card.BlockUnhovered += delegate { if (!IsDisposed) _blockTip.HideTip(); };
             _cards.Add(card);
@@ -676,15 +676,15 @@ namespace SkyMatch
         protected override void OnPaint(PaintEventArgs e)
         {
             Theme.Setup(e.Graphics);
-            Theme.DrawText(e.Graphics, "壁纸库", Theme.FontTitle, Theme.Text, 0, 0);
+            Theme.DrawText(e.Graphics, "Library", Theme.FontTitle, Theme.Text, 0, 0);
             int total = _controller.GetLibraryWallpapers().Count;
-            string sub = total + " 张可用壁纸  ·  " + _controller.ManualCount + " 张手动校准";
+            string sub = total + " wallpapers available · " + _controller.ManualCount + " manually calibrated";
             if (_controller.AutoExcludedCount > 0)
-                sub += "  ·  自动排除 " + _controller.AutoExcludedCount + " 张";
+                sub += "  ·  Auto-excluded " + _controller.AutoExcludedCount;
             if (_controller.AgeFilteredCount > 0)
-                sub += "  ·  分级隐藏 " + _controller.AgeFilteredCount + " 张";
+                sub += "  ·  Rating hidden " + _controller.AgeFilteredCount;
             if (_supplementCount > 0)
-                sub += "  ·  工坊补充 " + _supplementCount + " 张";
+                sub += "  ·  Workshop extras " + _supplementCount + " items";
             Theme.DrawText(e.Graphics, sub, Theme.FontTiny, Theme.Dim, 0, 34);
             base.OnPaint(e);
         }
