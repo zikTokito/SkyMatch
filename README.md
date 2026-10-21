@@ -478,8 +478,10 @@ Steam has no official API for third-party subscription clicks. Uninstalled items
 Use the **English release** if you want an English UI:
 
 - [SkyMatch 1.2.0 English release](https://github.com/zikTokito/SkyMatch/releases/tag/v1.2.0-en)
-- `SkyMatch-1.2.0-English-Setup.exe`
-- `SkyMatch-1.2.0-English-Portable.zip`
+- `SkyMatch-1.2.0-English-Lite-Setup.exe`
+- `SkyMatch-1.2.0-English-Lite-Portable.zip`
+
+The **Lite** package omits the ~427 MB CLIP/YOLO model weights. Copy the `models` folder from the main `SkyMatch-1.2.0-Portable.zip` release next to `SkyMatch.exe` to enable full local vision; without models the app falls back to preview features and keyword matching.
 
 The English build uses the same local cache format as the Chinese build. English source lives on the [`english` branch](https://github.com/zikTokito/SkyMatch/tree/english).
 
