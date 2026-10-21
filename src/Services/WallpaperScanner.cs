@@ -43,13 +43,13 @@ namespace SkyMatch
             result.WallpaperEnginePath = engine;
             if (String.IsNullOrEmpty(engine))
             {
-                result.Error = "没有找到 Wallpaper Engine，请确认 Steam 中已安装并运行过它。";
+                result.Error = "Wallpaper Engine was not found. Install it and run it once from Steam.";
                 return result;
             }
             if (String.IsNullOrEmpty(steam)) steam = GuessSteamFromEngine(engine);
             if (String.IsNullOrEmpty(steam))
             {
-                result.Error = "没有找到 Steam 安装目录。";
+                result.Error = "Steam installation directory not found.";
                 return result;
             }
             result.SteamPath = steam;
@@ -78,9 +78,9 @@ namespace SkyMatch
                 return String.Compare(a.Title, b.Title, StringComparison.CurrentCultureIgnoreCase);
             });
             if (seenWorkshops.Count == 0)
-                result.Error = "没有找到创意工坊目录（431960）。";
-            Log.Info("壁纸扫描完成：找到 " + result.Wallpapers.Count + " 张可用壁纸，跳过 "
-                + skipped + " 个项目；工坊目录 " + result.WorkshopPath);
+                result.Error = "Workshop directory 431960 not found.";
+            Log.Info("Wallpaper scan complete: found " + result.Wallpapers.Count + " usable wallpapers, skipped "
+                + skipped + " projects; workshop directory " + result.WorkshopPath);
             return result;
         }
 
@@ -91,7 +91,7 @@ namespace SkyMatch
             try { dirs = root.GetDirectories(); }
             catch (Exception ex)
             {
-                Log.Error("读取创意工坊目录失败：" + workshop, ex);
+                Log.Error("Failed to read the Workshop directory: " + workshop, ex);
                 return;
             }
             foreach (DirectoryInfo dir in dirs)
@@ -163,7 +163,7 @@ namespace SkyMatch
                     item.DirectorySize = mediaSize;
                     if (item.IsVideo && mediaSize > MaxVideoBytes)
                     {
-                        Log.Info("跳过大于 10 MB 的视频壁纸：" + fullFile);
+                        Log.Info("Skipping video wallpaper larger than 10 MB: " + fullFile);
                         return null;
                     }
                 }
@@ -188,7 +188,7 @@ namespace SkyMatch
             }
             catch (Exception ex)
             {
-                Log.Error("读取壁纸项目失败：" + projectFile, ex);
+                Log.Error("Failed to read wallpaper project: " + projectFile, ex);
                 return null;
             }
         }
@@ -399,7 +399,7 @@ namespace SkyMatch
                 }
                 catch (Exception ex)
                 {
-                    Log.Warn("读取 Steam 库配置失败：" + ex.Message);
+                    Log.Warn("Failed to read Steam library configuration: " + ex.Message);
                 }
             }
             return libraries;
@@ -441,7 +441,7 @@ namespace SkyMatch
             }
             catch (Exception ex)
             {
-                Log.Warn("读取当前壁纸失败：" + ex.Message);
+                Log.Warn("Failed to read the active wallpaper: " + ex.Message);
             }
             return "";
         }
